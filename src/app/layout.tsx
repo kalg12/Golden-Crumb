@@ -4,6 +4,7 @@ import { Playfair_Display, Geist } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import './globals.css';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,7 @@ export default function RootLayout({
           <Navbar />
           {children}
           <Footer />
+          <ScrollToTop />
         </ThemeProvider>
       </body>
     </html>
