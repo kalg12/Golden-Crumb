@@ -55,7 +55,7 @@
   --gc-card: #64371F;
   --gc-text: #F7EADD;
   --gc-text-secondary: #D7B895;
-  --gc-text-muted: #C5966C;
+  --gc-text-muted: #D9B080;
   --gc-accent: #D49A55;
   --gc-accent-hover: #F0C078;
   --gc-border: #7A4A2C;
@@ -136,13 +136,6 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-}
-
-body {
-  margin: 0;
-  background-color: var(--gc-bg);
-  color: var(--gc-text);
-  font-family: var(--font-sans-family);
 }
 
 @keyframes fadeIn {

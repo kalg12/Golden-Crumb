@@ -31,7 +31,7 @@ export function FaqPreview() {
           title="Frequently Asked Questions"
           subtitle="Quick answers to common questions."
         />
-        <div className="mx-auto max-w-3xl space-y-6">
+        <div className="mx-auto flex max-w-3xl flex-col gap-6">
           {faqs.map((faq) => (
             <Card key={faq.question}>
               <CardContent className="p-6">

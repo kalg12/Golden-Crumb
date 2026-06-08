@@ -102,10 +102,10 @@ export function OrderForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-xl space-y-6">
+    <form onSubmit={handleSubmit} className="mx-auto flex max-w-xl flex-col gap-6">
       <Card>
-        <CardContent className="space-y-5 p-6 sm:p-8">
-          <div className="space-y-2">
+        <CardContent className="flex flex-col gap-5 p-6 sm:p-8">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="name">
               Full name <span className="text-primary">*</span>
             </Label>
@@ -118,7 +118,7 @@ export function OrderForm() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="phone">
               Phone number <span className="text-primary">*</span>
             </Label>
@@ -132,7 +132,7 @@ export function OrderForm() {
             />
           </div>
 
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="email">
               Email <span className="text-primary">*</span>
             </Label>
@@ -175,7 +175,7 @@ export function OrderForm() {
           </RadioGroup>
 
           {form.pickupOrDelivery === 'delivery' && (
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 flex flex-col gap-2">
               <Label htmlFor="deliveryAddress">
                 Delivery address <span className="text-primary">*</span>
               </Label>
@@ -196,7 +196,7 @@ export function OrderForm() {
           <h3 className="mb-4 font-serif text-lg font-bold text-foreground">
             Select Cookies
           </h3>
-          <div className="space-y-3">
+          <div className="flex flex-col gap-3">
             {products.map((product) => (
               <label
                 key={product.id}
@@ -218,7 +218,7 @@ export function OrderForm() {
             ))}
           </div>
 
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 flex flex-col gap-2">
             <Label htmlFor="quantity">
               Quantity (approx. number of cookies)
             </Label>
@@ -241,7 +241,7 @@ export function OrderForm() {
             Preferred Date &amp; Time
           </h3>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="date">Date</Label>
               <Input
                 id="date"
@@ -251,7 +251,7 @@ export function OrderForm() {
                 min={today()}
               />
             </div>
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Label htmlFor="time">Time</Label>
               <Input
                 id="time"
@@ -266,7 +266,7 @@ export function OrderForm() {
 
       <Card>
         <CardContent className="p-6 sm:p-8">
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             <Label htmlFor="notes">Special notes or requests</Label>
             <Textarea
               id="notes"

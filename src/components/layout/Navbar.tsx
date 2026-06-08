@@ -9,19 +9,25 @@ import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
+import { useTheme } from '@/components/theme/ThemeProvider';
 import { SITE_NAME, NAV_LINKS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { theme } = useTheme();
+  const logoSrc =
+    theme === 'dark'
+      ? '/images/logos/GoldeCrumb-light.png'
+      : '/images/logos/GoldeCrumb-dark.png';
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[rgba(248,235,221,0.15)] bg-[#4B2616]">
+    <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-sm">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-2.5 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src="/images/logos/GoldeCrumb-light.png"
+            src={logoSrc}
             alt={SITE_NAME}
             width={160}
             height={40}
@@ -37,8 +43,8 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={cn(
-                  'rounded-lg px-3 py-2 text-sm font-medium text-[#F8EBDD]/75 transition-colors hover:text-[#D99A4E]',
-                  pathname === link.href && 'text-[#D99A4E]',
+                  'rounded-lg px-3 py-2 text-sm font-medium text-foreground/75 transition-colors hover:text-primary',
+                  pathname === link.href && 'text-primary',
                 )}
                 {...(pathname === link.href ? { 'aria-current': 'page' as const } : {})}
               >
@@ -48,15 +54,14 @@ export function Navbar() {
             <Button
               asChild
               size="sm"
-              className="ml-2 rounded-full bg-[#D99A4E] text-[#2B140D] hover:bg-[#D99A4E]/90"
+              variant="default"
+              className="ml-2 rounded-full"
             >
               <Link href="/order">Order Now</Link>
             </Button>
           </div>
 
-          <div className="text-[#F8EBDD]">
-            <ThemeToggle />
-          </div>
+          <ThemeToggle />
 
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild className="sm:hidden">
@@ -64,14 +69,13 @@ export function Navbar() {
                 variant="ghost"
                 size="icon"
                 aria-label="Open menu"
-                className="text-[#F8EBDD] hover:bg-[#F8EBDD]/10 hover:text-[#D99A4E]"
               >
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-60 border-l border-[rgba(248,235,221,0.15)] bg-[#4B2616] sm:w-75"
+              className="w-60 border-l border-border bg-card sm:w-75"
             >
               <SheetTitle className="sr-only">Navigation menu</SheetTitle>
               <div className="mt-8 flex flex-col gap-2">
@@ -81,8 +85,8 @@ export function Navbar() {
                     variant="ghost"
                     asChild
                     className={cn(
-                      'justify-start text-base text-[#F8EBDD]/75 hover:bg-[#F8EBDD]/10 hover:text-[#D99A4E]',
-                      pathname === link.href && 'text-[#D99A4E]',
+                      'justify-start text-base text-foreground/75',
+                      pathname === link.href && 'text-primary',
                     )}
                     onClick={() => setIsOpen(false)}
                   >
@@ -96,7 +100,8 @@ export function Navbar() {
                 ))}
                 <Button
                   asChild
-                  className="mt-4 rounded-full bg-[#D99A4E] text-[#2B140D] hover:bg-[#D99A4E]/90"
+                  variant="default"
+                  className="mt-4 rounded-full"
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href="/order">Order Now</Link>

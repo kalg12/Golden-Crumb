@@ -30,7 +30,7 @@ export function Footer() {
             <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">
               Links
             </h4>
-            <ul className="space-y-2">
+            <ul className="flex flex-col gap-2">
               {NAV_LINKS.map((link) => (
                 <li key={link.href}>
                   <Link
@@ -48,7 +48,7 @@ export function Footer() {
             <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">
               Contact
             </h4>
-            <ul className="space-y-2 text-sm text-secondary-foreground">
+            <ul className="flex flex-col gap-2 text-sm text-secondary-foreground">
               <li>{CONTACT.location}</li>
               <li>
                 <a
@@ -73,7 +73,7 @@ export function Footer() {
             <h4 className="mb-3 text-sm font-semibold uppercase tracking-wider text-foreground">
               Follow Us
             </h4>
-            <ul className="space-y-2 text-sm text-secondary-foreground">
+            <ul className="flex flex-col gap-2 text-sm text-secondary-foreground">
               <li>
                 <a
                   href={SOCIAL.instagram}

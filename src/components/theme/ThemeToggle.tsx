@@ -21,7 +21,7 @@ export function ThemeToggle() {
   if (!hydrated) {
     return (
       <Button variant="ghost" size="icon" aria-label="Toggle theme">
-        <div className="h-5 w-5" />
+        <div className="size-5" />
       </Button>
     );
   }
@@ -34,9 +34,9 @@ export function ThemeToggle() {
       aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
     >
       {theme === 'light' ? (
-        <Moon className="h-5 w-5" />
+        <Moon className="size-5" />
       ) : (
-        <Sun className="h-5 w-5" />
+        <Sun className="size-5" />
       )}
     </Button>
   );

@@ -65,7 +65,7 @@ function CookieVisual() {
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-card">
+    <section className="relative overflow-hidden bg-secondary">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="py-16 sm:py-20 lg:py-28">
