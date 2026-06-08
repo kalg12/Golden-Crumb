@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import Image from 'next/image';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
@@ -75,37 +75,68 @@ export function Navbar() {
             </SheetTrigger>
             <SheetContent
               side="right"
-              className="w-60 border-l border-border bg-card sm:w-75"
+              showCloseButton={false}
+              className="flex !w-[85vw] max-w-[360px] flex-col rounded-l-2xl border-l border-border bg-card p-0"
             >
               <SheetTitle className="sr-only">Navigation menu</SheetTitle>
-              <div className="mt-8 flex flex-col gap-2">
-                {NAV_LINKS.map((link) => (
-                  <Button
-                    key={link.href}
-                    variant="ghost"
-                    asChild
-                    className={cn(
-                      'justify-start text-base text-foreground/75',
-                      pathname === link.href && 'text-primary',
-                    )}
-                    onClick={() => setIsOpen(false)}
-                  >
+
+              <div className="flex items-center justify-between border-b border-border px-5 py-4">
+                <Link href="/" onClick={() => setIsOpen(false)}>
+                  <Image
+                    src={logoSrc}
+                    alt={SITE_NAME}
+                    width={140}
+                    height={35}
+                    className="h-8 w-auto"
+                    priority
+                  />
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close menu"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X className="size-5" />
+                </Button>
+              </div>
+
+              <nav className="flex-1 overflow-y-auto px-5 py-6">
+                <div className="flex flex-col gap-1">
+                  {NAV_LINKS.map((link) => (
                     <Link
+                      key={link.href}
                       href={link.href}
+                      className={cn(
+                        'flex items-center rounded-xl px-4 py-3 text-base font-medium transition-colors',
+                        pathname === link.href
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-foreground/75 hover:bg-muted hover:text-foreground',
+                      )}
+                      onClick={() => setIsOpen(false)}
                       {...(pathname === link.href ? { 'aria-current': 'page' as const } : {})}
                     >
                       {link.label}
                     </Link>
-                  </Button>
-                ))}
+                  ))}
+                </div>
+              </nav>
+
+              <div className="px-5 pb-4">
                 <Button
                   asChild
-                  variant="default"
-                  className="mt-4 rounded-full"
+                  size="lg"
+                  className="w-full rounded-full"
                   onClick={() => setIsOpen(false)}
                 >
                   <Link href="/order">Order Now</Link>
                 </Button>
+              </div>
+
+              <div className="border-t border-border px-5 py-4">
+                <p className="text-center text-xs text-muted-foreground">
+                  Freshly baked daily
+                </p>
               </div>
             </SheetContent>
           </Sheet>
