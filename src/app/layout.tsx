@@ -21,6 +21,15 @@ export const metadata: Metadata = {
     'Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings.',
 };
 
+const themeScript = `
+  (function() {
+    var theme = localStorage.getItem('theme');
+    if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+  })();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,6 +41,9 @@ export default function RootLayout({
       className={cn(playfairDisplay.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
           <Navbar />
