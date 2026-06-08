@@ -5,7 +5,7 @@ import { SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/constants';
 function CookieVisual() {
   return (
     <div className="relative flex items-center justify-center">
-      <div className="absolute h-[460px] w-[460px] rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute h-115 w-115 rounded-full bg-primary/10 blur-3xl" />
       <svg
         viewBox="0 0 400 400"
         className="relative h-72 w-72 sm:h-80 sm:w-80 lg:h-96 lg:w-96"
