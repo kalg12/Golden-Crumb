@@ -1,5 +1,6 @@
 import Link from 'next/link';
 
+import { Button } from '@/components/ui/button';
 import { SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/constants';
 
 function CookieVisual() {
@@ -79,18 +80,12 @@ export function HeroSection() {
               everyday treats, thoughtful gifts, and sweet moments.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
-              <Link
-                href="/menu"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-              >
-                View Our Menu
-              </Link>
-              <Link
-                href="/order"
-                className="inline-flex h-11 items-center justify-center rounded-full border border-border/60 px-8 text-sm font-semibold text-foreground transition-all hover:border-foreground/30 hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-              >
-                Place an Order
-              </Link>
+              <Button asChild size="lg" className="rounded-full px-8">
+                <Link href="/menu">View Our Menu</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg" className="rounded-full px-8">
+                <Link href="/order">Place an Order</Link>
+              </Button>
             </div>
           </div>
           <div className="hidden lg:flex">
