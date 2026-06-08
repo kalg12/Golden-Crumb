@@ -1,20 +1,18 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, Inter } from 'next/font/google';
+import { Playfair_Display, Geist } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import './globals.css';
+import { cn } from '@/lib/utils';
 
 const playfairDisplay = Playfair_Display({
   variable: '--font-serif-family',
   subsets: ['latin'],
 });
 
-const inter = Inter({
-  variable: '--font-sans-family',
-  subsets: ['latin'],
-});
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
   title: 'Golden Crumb — Artisan Cookies',
@@ -30,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${playfairDisplay.variable} ${inter.variable}`}
+      className={cn(playfairDisplay.variable, "font-sans", geist.variable)}
       suppressHydrationWarning
     >
       <body className="min-h-screen flex flex-col">
