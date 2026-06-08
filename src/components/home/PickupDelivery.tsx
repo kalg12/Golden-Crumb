@@ -5,7 +5,7 @@ import { CONTACT } from '@/lib/constants';
 
 export function PickupDelivery() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
           title="Pickup &amp; Delivery"

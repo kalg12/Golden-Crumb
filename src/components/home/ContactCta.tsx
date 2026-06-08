@@ -4,7 +4,7 @@ import { SOCIAL, CONTACT } from '@/lib/constants';
 
 export function ContactCta() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-14 sm:py-20 lg:py-24">
       <Container>
         <div className="rounded-2xl bg-primary/10 p-8 text-center sm:p-12">
           <h2 className="font-serif text-3xl font-bold text-foreground sm:text-4xl">

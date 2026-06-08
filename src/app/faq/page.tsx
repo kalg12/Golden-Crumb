@@ -54,7 +54,7 @@ const faqs = [
 
 export default function FaqPage() {
   return (
-    <main className="flex-1 py-16 sm:py-20">
+    <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
           title="Frequently Asked Questions"

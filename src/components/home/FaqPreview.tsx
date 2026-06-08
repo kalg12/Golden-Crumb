@@ -25,7 +25,7 @@ const faqs = [
 
 export function FaqPreview() {
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
           title="Frequently Asked Questions"

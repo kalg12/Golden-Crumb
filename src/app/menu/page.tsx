@@ -5,7 +5,7 @@ import { products } from '@/data/products';
 
 export default function MenuPage() {
   return (
-    <main className="flex-1 py-16 sm:py-20">
+    <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
           title="Our Menu"
