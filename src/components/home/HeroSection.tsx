@@ -5,7 +5,7 @@ import { SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/constants';
 function CookieVisual() {
   return (
     <div className="relative flex items-center justify-center">
-      <div className="absolute h-[460px] w-[460px] rounded-full bg-[#D99A4E]/10 blur-3xl" />
+      <div className="absolute h-[460px] w-[460px] rounded-full bg-primary/10 blur-3xl" />
       <svg
         viewBox="0 0 400 400"
         className="relative h-72 w-72 sm:h-80 sm:w-80 lg:h-96 lg:w-96"
@@ -56,38 +56,38 @@ function CookieVisual() {
         <path d="M232 118 Q255 132 248 156" stroke="#E8A84C" strokeWidth="2.5" strokeLinecap="round" opacity="0.4" />
         <path d="M285 242 Q262 255 250 278" stroke="#E8A84C" strokeWidth="2" strokeLinecap="round" opacity="0.35" />
       </svg>
-      <div className="absolute -right-2 top-8 h-10 w-10 rounded-full border border-[#D99A4E]/20 lg:h-14 lg:w-14" />
-      <div className="absolute -bottom-1 left-6 h-6 w-6 rounded-full border border-[#D99A4E]/15 lg:h-9 lg:w-9" />
+      <div className="absolute -right-2 top-8 h-10 w-10 rounded-full border border-primary/20 lg:h-14 lg:w-14" />
+      <div className="absolute -bottom-1 left-6 h-6 w-6 rounded-full border border-primary/15 lg:h-9 lg:w-9" />
     </div>
   );
 }
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-[#4B2616]">
+    <section className="relative overflow-hidden bg-card">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <div className="grid min-h-[calc(100vh-4rem)] grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
           <div className="py-16 sm:py-20 lg:py-28">
-            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-[#D99A4E]">
+            <p className="mb-4 text-sm font-semibold uppercase tracking-[0.2em] text-primary">
               {SITE_TAGLINE}
             </p>
-            <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-[#F8EBDD] sm:text-5xl lg:text-6xl">
+            <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
               {SITE_DESCRIPTION}
             </h1>
-            <p className="mt-6 max-w-lg text-base leading-relaxed text-[#F8EBDD]/75 sm:text-lg">
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
               Small-batch cookies baked fresh daily in San Francisco. Perfect for
               everyday treats, thoughtful gifts, and sweet moments.
             </p>
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
                 href="/menu"
-                className="inline-flex h-11 items-center justify-center rounded-full bg-[#D99A4E] px-8 text-sm font-semibold text-[#2B140D] transition-all hover:bg-[#D99A4E]/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D99A4E]/50"
+                className="inline-flex h-11 items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               >
                 View Our Menu
               </Link>
               <Link
                 href="/order"
-                className="inline-flex h-11 items-center justify-center rounded-full border border-[rgba(248,235,221,0.25)] px-8 text-sm font-semibold text-[#F8EBDD] transition-all hover:border-[#F8EBDD]/50 hover:bg-[#F8EBDD]/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F8EBDD]/30"
+                className="inline-flex h-11 items-center justify-center rounded-full border border-border/60 px-8 text-sm font-semibold text-foreground transition-all hover:border-foreground/30 hover:bg-foreground/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
               >
                 Place an Order
               </Link>
