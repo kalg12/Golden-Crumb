@@ -16,7 +16,7 @@ export function Footer() {
   return (
     <footer className="border-t border-border bg-secondary">
       <Container className="py-12 lg:py-16">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
           <div>
             <h3 className="font-serif text-lg font-bold text-foreground">
               {SITE_NAME}
@@ -100,7 +100,7 @@ export function Footer() {
 
         <Separator className="my-8" />
 
-        <div className="text-center text-xs text-muted-foreground">
+        <div className="pb-6 text-center text-xs text-muted-foreground">
           <p className="mb-2">{ALLERGEN_NOTICE}</p>
           <p>&copy; {currentYear} {SITE_NAME}. All rights reserved.</p>
         </div>
