@@ -1,447 +1,124 @@
 # AGENTS.md
 
-## Project context
+## Project
 
-This is a Next.js project for **Golden Crumb**, an artisan cookie brand based in San Francisco, California.
-
-The first version must be an MVP landing page, not a full e-commerce platform yet.
-
-The project should be designed to grow later into:
-
-- Product catalog
-- Online ordering
-- Stripe Checkout
-- Admin dashboard
-- Order management
-- Pickup/delivery scheduling
-- Customer notifications
-- Blog or content pages
-- SEO-focused marketing pages
-
-For now, prioritize:
-
-- Premium landing page
-- Cookie menu
-- Simple order page
-- FAQ
-- Contact section
-- WhatsApp / Instagram links
-- Mobile-first experience
-- Markdown/MDX content where useful
-
-Do not build a full e-commerce system unless explicitly requested.
-
----
-
-## Brand identity
-
-Brand name:
-
-**Golden Crumb**
-
-Tagline:
-
-**Artisan Cookies**
-
-Brand personality:
-
-- Warm
-- Premium
-- Elegant
-- Handmade
-- Friendly
-- Trustworthy
-- Modern
-- Appetizing
-- Boutique bakery style
-
-The website should feel like a high-quality artisan cookie brand, not a generic bakery template.
-
-The design should communicate:
-
-- Freshly baked cookies
-- Small-batch quality
-- Homemade warmth
-- Premium presentation
-- Simple and trustworthy ordering
-
----
-
-## Visual references
-
-The brand has two logo versions:
-
-1. Light version:
-   - Cream / beige background
-   - Dark chocolate typography
-   - Golden cookie illustration
-   - Warm, soft, elegant feel
-
-2. Dark version:
-   - Deep chocolate brown background
-   - Cream typography
-   - Golden cookie illustration
-   - Premium, rich, elegant feel
-
-Use these references as the main visual direction.
-
----
-
-## Color system
-
-Use a warm cookie-inspired palette.
-
-### Light theme
-
-Recommended colors:
-
-- Background: `#F0E0D0`
-- Surface: `#FFF7EC`
-- Card: `#F8EBDD`
-- Primary text: `#4A2718`
-- Secondary text: `#8A5D3B`
-- Muted text: `#A87954`
-- Accent: `#D49A55`
-- Accent dark: `#A7642D`
-- Border: `#E2CBB6`
-
-### Dark theme
-
-Recommended colors:
-
-- Background: `#482612`
-- Surface: `#5A3019`
-- Card: `#64371F`
-- Primary text: `#F7EADD`
-- Secondary text: `#D7B895`
-- Muted text: `#C5966C`
-- Accent: `#D49A55`
-- Accent light: `#F0C078`
-- Border: `#7A4A2C`
-
-### Usage rules
-
-- Light mode should feel soft, clean, bright, and elegant.
-- Dark mode should feel rich, chocolatey, premium, and cozy.
-- Do not use cold colors as main colors.
-- Avoid blue, purple, gray-heavy, or neon palettes.
-- Use the golden accent color only for important actions, highlights, prices, badges, and CTA buttons.
-- Maintain enough contrast for accessibility.
-- Buttons must be clearly visible in both light and dark modes.
-
----
-
-## Typography direction
-
-Use elegant and readable typography.
-
-Recommended style:
-
-- Headings: elegant serif or high-quality display font.
-- Body: clean sans-serif.
-- Navigation: simple, readable sans-serif.
-- Product names: can use serif for a premium look.
-
-If using Google Fonts, prefer combinations like:
-
-- `Playfair Display` or `Cormorant Garamond` for headings.
-- `Inter`, `Lato`, or `Nunito Sans` for body text.
-
-Typography rules:
-
-- Headings should feel premium and editorial.
-- Body text must remain readable on mobile.
-- Avoid overly decorative fonts for long text.
-- Do not use too many fonts.
-- Maximum two font families.
-
----
-
-## UI/UX rules
-
-Design must be mobile-first.
-
-The website must work beautifully on:
-
-- Small phones
-- Large phones
-- Tablets
-- Desktop screens
-
-General UI rules:
-
-- Use generous spacing.
-- Use rounded cards, but avoid childish styling.
-- Use soft shadows only when they improve hierarchy.
-- Use clean section separation.
-- Use large product images.
-- Make CTA buttons obvious.
-- Avoid clutter.
-- Avoid too much text above the fold.
-- Keep the purchase/order journey simple.
-- Use consistent spacing, button styles, cards, and typography.
-
-The UI should feel:
-
-- Premium
-- Warm
-- Clean
-- Appetizing
-- Easy to understand
-
-The UI should not feel:
-
-- Cheap
-- Overloaded
-- Generic
-- Corporate
-- Too playful
-- Too childish
-
----
-
-## Responsive rules
-
-### Mobile
-
-Mobile is the priority.
-
-On mobile:
-
-- Navigation should be simple.
-- Hero section should be clear and short.
-- CTA button should appear early.
-- Product cards should be stacked vertically.
-- Text should not be too small.
-- Buttons should be easy to tap.
-- Images should load properly and not break the layout.
-- Avoid horizontal scrolling.
-- Use sticky or repeated CTA only if it improves conversion.
-
-Recommended mobile sections order:
-
-1. Navbar
-2. Hero
-3. Main CTA
-4. Featured cookies
-5. How to order
-6. Pickup/delivery info
-7. FAQ
-8. Contact
-9. Footer
-
-### Desktop
-
-On desktop:
-
-- Use wider layouts with strong visual balance.
-- Hero can use two columns: text + cookie image.
-- Product sections can use grids.
-- Cards can use 3-column layout.
-- Keep max-width containers.
-- Avoid stretching content too wide.
-- Use whitespace to create a premium feel.
-
----
-
-## Content strategy
-
-Use English copy because the business is based in San Francisco.
-
-Tone:
-
-- Friendly
-- Warm
-- Short
-- Clear
-- Conversion-focused
-- Premium but not arrogant
-
-Avoid:
-
-- Generic filler text
-- Exaggerated claims
-- Health claims
-- Legal claims
-- Too much marketing hype
-
-Good example tone:
-
-"Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings."
-
-Useful content sections:
-
-- Hero headline
-- Short brand intro
-- Featured cookies
-- How to order
-- Pickup and delivery
-- FAQ
-- Allergen notice
-- Contact CTA
-- Instagram CTA
-
----
-
-## Legal and trust content
-
-Because this is a food business, always consider trust and safety.
-
-Include simple disclaimers where appropriate:
-
-- Cookies may contain milk, eggs, wheat, soy, peanuts, or tree nuts.
-- Customers with allergies should contact the business before ordering.
-- Pickup and delivery availability may vary by location and date.
-- Orders should be confirmed manually before preparation.
-- Refund/cancellation policy should be added when the business is ready.
-
-Do not invent legal guarantees.
-
-Do not claim permits, certifications, or licenses unless the user explicitly provides them.
-
----
-
-## MVP scope
-
-The first version should include:
-
-- Home page
-- Menu page
-- Order page
-- FAQ page
-- Contact section
-- Instagram link
-- WhatsApp or direct message CTA
-- Simple order form UI
-- Basic policies or allergen notice
-- Responsive layout
-- Light/dark visual system
-
-The first version should not include unless explicitly requested:
-
-- Stripe
-- Cart
-- Authentication
-- Customer accounts
-- Admin dashboard
-- Inventory
-- Delivery routing
-- Coupons
-- Loyalty points
-- Subscriptions
-- Complex backend
-
----
-
-## Future growth architecture
-
-Build the project in a way that can grow later.
-
-Recommended growth path:
-
-1. Static landing page
-2. Static product menu
-3. Simple order form
-4. Email notification
-5. Database storage with Supabase or PostgreSQL
-6. Stripe Checkout
-7. Admin dashboard
-8. Order tracking
-9. Customer notifications
-10. Full e-commerce features
-
-Do not over-engineer the first version.
-
----
+Golden Crumb — artisan cookie brand based in San Francisco. MVP landing page (not full e-commerce).
 
 ## Tech stack
 
-Use:
+- Next.js 16 (App Router), React 19, TypeScript 5 (strict)
+- Tailwind CSS 4, PostCSS
+- ESLint 9 (eslint-config-next/core-web-vitals, eslint-config-next/typescript)
+- pnpm (package manager)
+- ShadCN UI (planned), MDX (planned)
+- Deployed on Vercel
 
-- Next.js App Router
-- TypeScript
-- Tailwind CSS
-- ShadCN UI
-- MDX for editable content
-- Vercel for deployment
+## Commands
 
-Optional later:
+| Command | Purpose |
+|---------|---------|
+| `pnpm dev` | Start dev server |
+| `pnpm build` | Production build (includes type-check) |
+| `pnpm start` | Start production server |
+| `pnpm lint` | Run ESLint across the project |
 
-- Supabase
-- Stripe Checkout
-- Resend
-- Cloudinary or Supabase Storage
-- Zod
-- React Hook Form
+No test runner is configured yet. When adding one, use Vitest (recommended) and add scripts: `pnpm test` for all tests, `pnpm test -- --watch` for watch mode, `pnpm test -- --run <path>` for single-file mode.
 
----
+TypeScript config: strict mode enabled. Path alias `@/*` maps to `./src/*`.
 
-## Coding rules
+## Code style
 
-- Use TypeScript strictly.
-- Avoid `any`.
-- Prefer explicit types.
-- Use reusable components.
-- Keep components small and readable.
-- Use Server Components by default.
-- Use Client Components only when interactivity is required.
-- Do not introduce unnecessary dependencies.
-- Do not modify unrelated files.
-- Do not remove existing functionality.
-- Do not change business logic unless explicitly requested.
-- Keep the code clean and easy to maintain.
-- Use semantic HTML.
-- Follow accessibility best practices.
+**Imports**: Group by: 1) external packages, 2) `@/` internal aliases, 3) relative imports. Use `import type` for type-only imports. No default exports except pages/layouts.
 
----
+**Formatting**: No Prettier config — rely on ESLint. Use single quotes. Semicolons required. 2-space indent. 80-100 char line length.
+
+**Types**: Strict TypeScript. Avoid `any` — use `unknown` then narrow. Prefer explicit return types on functions. Use `interface` for public API shapes, `type` for unions/utility types.
+
+**Naming**: PascalCase for components/types/interfaces. camelCase for variables/functions/hooks/files. kebab-case for directories. File name matches exported name (e.g., `CookieCard.tsx` exports `CookieCard`). Use `.tsx` extension for files with JSX.
+
+## Component patterns
+
+- Server Components by default. Client Components (`"use client"`) only when using hooks, event handlers, or browser APIs.
+- Props typed with `interface` (not inline). Use `React.ReactNode` for children.
+- Keep components small — extract sub-components when a file exceeds ~150 lines.
+- Use semantic HTML (`<nav>`, `<main>`, `<section>`, `<article>`, etc.).
+- Use Tailwind classes directly — avoid CSS modules or styled-components.
+
+## Error handling
+
+- Use `try/catch` in Server Components for data fetching.
+- Use `error.tsx` files (Next.js App Router convention) for per-route error boundaries.
+- Use `not-found.tsx` for 404 states.
+- Do not catch errors silently — always log or rethrow.
+
+## Data patterns
+
+- Define static data in `src/data/` as typed arrays.
+- Use `generateStaticParams` for static routes.
+- MDX content goes in `src/content/`.
+- Do not add server-side state management unless needed.
 
 ## File organization
 
-Recommended structure:
-
-```txt
-app/
-  page.tsx
-  menu/
-    page.tsx
-  order/
-    page.tsx
-  faq/
-    page.tsx
-  layout.tsx
-
-components/
-  layout/
-    Navbar.tsx
-    Footer.tsx
-  home/
-    HeroSection.tsx
-    FeaturedCookies.tsx
-    HowToOrder.tsx
-    OrderCTA.tsx
-  menu/
-    CookieCard.tsx
-    CookieGrid.tsx
-  shared/
-    SectionHeader.tsx
-    Container.tsx
-
-content/
-  pages/
-    about.mdx
-    faq.mdx
-    policies.mdx
-
-data/
-  products.ts
-
-lib/
-  constants.ts
-  utils.ts
-
-public/
-  images/
-    logo-light.png
-    logo-dark.png
-    cookies/
 ```
+src/
+  app/          -- Next.js App Router pages/layouts
+  components/   -- Reusable UI components
+    layout/     -- Navbar, Footer
+    home/       -- HeroSection, FeaturedCookies, etc.
+    menu/       -- CookieCard, CookieGrid
+    shared/     -- SectionHeader, Container
+  data/         -- Static product data
+  content/      -- MDX page content
+  lib/          -- Utilities, constants
+public/images/  -- Static assets
+```
+
+## Brand identity
+
+- **Name**: Golden Crumb · **Tagline**: Artisan Cookies
+- **Tone**: Warm, premium, friendly, conversion-focused. English copy.
+- **Personality**: Boutique bakery — elegant, handmade, trustworthy, modern.
+
+## Content strategy
+
+- Write in English (San Francisco based). Friendly, warm, short, clear.
+- Avoid generic filler, exaggerated claims, health/legal claims, marketing hype.
+- Include simple allergen disclaimers (may contain milk, eggs, wheat, soy, peanuts, tree nuts).
+- Do not invent permits, certifications, or licenses.
+
+## MVP scope
+
+**Include**: Home page, menu page, order page, FAQ, contact section, Instagram/WhatsApp links, simple order form UI, allergen notice, responsive layout, light/dark theme.
+
+**Exclude unless asked**: Stripe, cart, auth, accounts, admin, inventory, delivery routing, coupons, subscriptions, complex backend.
+
+## Color system (Tailwind theme)
+
+**Light**: bg `#F0E0D0`, surface `#FFF7EC`, card `#F8EBDD`, text `#4A2718`, accent `#D49A55`
+**Dark**: bg `#482612`, surface `#5A3019`, card `#64371F`, text `#F7EADD`, accent `#D49A55`
+No cold colors. Accent reserved for CTAs, prices, badges, highlights.
+
+## Typography
+
+- Headings: `Playfair Display` or `Cormorant Garamond` (serif)
+- Body: `Inter`, `Lato`, or `Nunito Sans` (sans-serif)
+- Max 2 font families. Currently using Geist (Vercel default) — replace per brand guide.
+
+## Responsive
+
+Mobile-first. Hero stacks vertically on mobile, 2-column on desktop. Product grid: 1-col mobile, 3-col desktop. Use generous whitespace. Max-width containers.
+
+## Git conventions
+
+- Commits: imperative mood, lowercase, no period. Prefix with type (e.g., `feat:`, `fix:`, `refactor:`, `style:`, `chore:`).
+- Branch from `main`. Use descriptive kebab-case branch names.
+- Do not push to main/master. Do not force-push without explicit instruction.
+
+## Agent notes
+
+- Read AGENTS.md fully before starting any task.
+- Run `pnpm lint` after completing any work to verify no regressions.
+- Run `pnpm build` before marking a task complete.
+- When adding dependencies, prefer tools listed in the "Optional later" section of the project context above.
+- Do not modify files outside the scope of the task. Do not remove existing functionality.
