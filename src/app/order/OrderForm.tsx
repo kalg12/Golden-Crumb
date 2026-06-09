@@ -1,20 +1,20 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Check, Minus, Plus, Store, Truck } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AlertTriangle, Check, Minus, Plus, Store, Truck } from "lucide-react";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/select";
 import {
   Combobox,
   ComboboxContent,
@@ -22,13 +22,13 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@/components/ui/combobox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
-import { SOCIAL } from '@/lib/constants';
-import { products } from '@/data/products';
-import { US_STATES } from '@/data/locations';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/combobox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
+import { SOCIAL } from "@/lib/constants";
+import { products } from "@/data/products";
+import { US_STATES } from "@/data/locations";
+import { cn } from "@/lib/utils";
 
 interface CityInfo {
   city: string;
@@ -48,7 +48,7 @@ interface FormData {
   name: string;
   phone: string;
   email: string;
-  pickupOrDelivery: 'pickup' | 'delivery';
+  pickupOrDelivery: "pickup" | "delivery";
   address: AddressFields;
   quantities: Record<string, number>;
   preferredDate: string;
@@ -58,33 +58,31 @@ interface FormData {
 }
 
 const initialAddress: AddressFields = {
-  line1: '',
-  line2: '',
-  city: '',
-  state: '',
-  zip: '',
+  line1: "",
+  line2: "",
+  city: "",
+  state: "",
+  zip: "",
 };
 
-const initialQuantities = Object.fromEntries(
-  products.map((p) => [p.id, 0]),
-);
+const initialQuantities = Object.fromEntries(products.map((p) => [p.id, 0]));
 
 const initialForm: FormData = {
-  name: '',
-  phone: '',
-  email: '',
-  pickupOrDelivery: 'pickup',
+  name: "",
+  phone: "",
+  email: "",
+  pickupOrDelivery: "pickup",
   address: initialAddress,
   quantities: initialQuantities,
-  preferredDate: '',
-  preferredTime: '',
-  notes: '',
+  preferredDate: "",
+  preferredTime: "",
+  notes: "",
   allergyConfirmed: false,
 };
 
 const today = () => {
   const d = new Date();
-  return d.toISOString().split('T')[0];
+  return d.toISOString().split("T")[0];
 };
 
 export function OrderForm() {
@@ -98,8 +96,8 @@ export function OrderForm() {
   const updateAddress = (field: keyof AddressFields, value: string) => {
     setForm((prev) => {
       const next = { ...prev.address, [field]: value };
-      if (field === 'state') {
-        next.city = '';
+      if (field === "state") {
+        next.city = "";
       }
       return { ...prev, address: next };
     });
@@ -148,7 +146,7 @@ export function OrderForm() {
 
     fetch(`/api/cities?state=${state}`)
       .then((res) => {
-        if (!res.ok) throw new Error('Failed to fetch');
+        if (!res.ok) throw new Error("Failed to fetch");
         return res.json() as Promise<{ cities: CityInfo[] }>;
       })
       .then((data) => {
@@ -163,7 +161,9 @@ export function OrderForm() {
         setCitiesLoading(false);
       });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [form.address.state]);
 
   const citySuggestions = useMemo(
@@ -198,7 +198,7 @@ export function OrderForm() {
             </h2>
             <p className="mt-3 text-secondary-foreground">
               We&rsquo;ve received your request and will confirm it shortly. If
-              you have urgent questions, reach out on{' '}
+              you have urgent questions, reach out on{" "}
               <a
                 href={SOCIAL.whatsapp}
                 target="_blank"
@@ -206,8 +206,8 @@ export function OrderForm() {
                 className="font-medium text-primary hover:text-primary/80"
               >
                 WhatsApp
-              </a>{' '}
-              or{' '}
+              </a>{" "}
+              or{" "}
               <a
                 href={SOCIAL.instagram}
                 target="_blank"
@@ -243,7 +243,7 @@ export function OrderForm() {
               <Input
                 id="name"
                 value={form.name}
-                onChange={(e) => update('name', e.target.value)}
+                onChange={(e) => update("name", e.target.value)}
                 required
                 placeholder="Your name"
               />
@@ -257,7 +257,7 @@ export function OrderForm() {
                   id="phone"
                   type="tel"
                   value={form.phone}
-                  onChange={(e) => update('phone', e.target.value)}
+                  onChange={(e) => update("phone", e.target.value)}
                   required
                   placeholder="(555) 123-4567"
                 />
@@ -270,7 +270,7 @@ export function OrderForm() {
                   id="email"
                   type="email"
                   value={form.email}
-                  onChange={(e) => update('email', e.target.value)}
+                  onChange={(e) => update("email", e.target.value)}
                   required
                   placeholder="hello@example.com"
                 />
@@ -295,8 +295,8 @@ export function OrderForm() {
               </Label>
               <RadioGroup
                 value={form.pickupOrDelivery}
-                onValueChange={(value: 'pickup' | 'delivery') =>
-                  update('pickupOrDelivery', value)
+                onValueChange={(value: "pickup" | "delivery") =>
+                  update("pickupOrDelivery", value)
                 }
                 className="grid grid-cols-2 gap-3"
               >
@@ -304,34 +304,44 @@ export function OrderForm() {
                   htmlFor="pickup"
                   className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:[&_svg]:text-primary"
                 >
-                  <RadioGroupItem value="pickup" id="pickup" className="sr-only" />
+                  <RadioGroupItem
+                    value="pickup"
+                    id="pickup"
+                    className="sr-only"
+                  />
                   <Store className="size-6 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Pickup</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Pickup
+                  </span>
                 </Label>
                 <Label
                   htmlFor="delivery"
                   className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:[&_svg]:text-primary"
                 >
-                  <RadioGroupItem value="delivery" id="delivery" className="sr-only" />
+                  <RadioGroupItem
+                    value="delivery"
+                    id="delivery"
+                    className="sr-only"
+                  />
                   <Truck className="size-6 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">Delivery</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Delivery
+                  </span>
                 </Label>
               </RadioGroup>
             </div>
 
-            {form.pickupOrDelivery === 'delivery' && (
+            {form.pickupOrDelivery === "delivery" && (
               <fieldset className="flex flex-col gap-4">
                 <legend className="text-sm font-medium text-foreground">
                   Delivery address <span className="text-primary">*</span>
                 </legend>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="addressLine1">
-                    Street address
-                  </Label>
+                  <Label htmlFor="addressLine1">Street address</Label>
                   <Input
                     id="addressLine1"
                     value={form.address.line1}
-                    onChange={(e) => updateAddress('line1', e.target.value)}
+                    onChange={(e) => updateAddress("line1", e.target.value)}
                     required
                     placeholder="123 Main St"
                     autoComplete="address-line1"
@@ -339,12 +349,13 @@ export function OrderForm() {
                 </div>
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="addressLine2">
-                    Apt, suite, unit <span className="text-muted-foreground">(optional)</span>
+                    Apt, suite, unit{" "}
+                    <span className="text-muted-foreground">(optional)</span>
                   </Label>
                   <Input
                     id="addressLine2"
                     value={form.address.line2}
-                    onChange={(e) => updateAddress('line2', e.target.value)}
+                    onChange={(e) => updateAddress("line2", e.target.value)}
                     placeholder="Apt 4B"
                     autoComplete="address-line2"
                   />
@@ -354,7 +365,7 @@ export function OrderForm() {
                     <Label htmlFor="addressState">State</Label>
                     <Select
                       value={form.address.state}
-                      onValueChange={(value) => updateAddress('state', value)}
+                      onValueChange={(value) => updateAddress("state", value)}
                     >
                       <SelectTrigger id="addressState" className="px-2">
                         <SelectValue placeholder="State" />
@@ -372,19 +383,28 @@ export function OrderForm() {
                     </Select>
                   </div>
                   <div className="min-w-0 flex-1 basis-[160px]">
-                    <Label htmlFor="addressCity" className={cn(!form.address.state && 'text-muted-foreground')}>
+                    <Label
+                      htmlFor="addressCity"
+                      className={cn(
+                        !form.address.state && "text-muted-foreground",
+                      )}
+                    >
                       City
                     </Label>
                     {form.address.state ? (
                       <Combobox
                         items={cityOptions}
                         value={form.address.city || null}
-                        onValueChange={(city: string | null) => updateAddress('city', city ?? '')}
+                        onValueChange={(city: string | null) =>
+                          updateAddress("city", city ?? "")
+                        }
                         disabled={citiesLoading}
                       >
                         <ComboboxInput
                           id="addressCity"
-                          placeholder={citiesLoading ? 'Loading...' : 'Search cities...'}
+                          placeholder={
+                            citiesLoading ? "Loading..." : "Search cities..."
+                          }
                           disabled={citiesLoading}
                           showClear
                         />
@@ -398,9 +418,9 @@ export function OrderForm() {
                                 <ComboboxItem key={cityName} value={cityName}>
                                   {cityName}
                                   {cityInfo?.county && (
-                                  <span className="ml-1.5 text-muted-foreground">
-                                    ({cityInfo.county})
-                                  </span>
+                                    <span className="ml-1.5 text-muted-foreground">
+                                      ({cityInfo.county})
+                                    </span>
                                   )}
                                 </ComboboxItem>
                               );
@@ -411,7 +431,9 @@ export function OrderForm() {
                     ) : (
                       <Input
                         id="addressCity"
-                        placeholder={citiesError ? 'Failed to load' : 'Select state first'}
+                        placeholder={
+                          citiesError ? "Failed to load" : "Select state first"
+                        }
                         disabled
                       />
                     )}
@@ -421,7 +443,7 @@ export function OrderForm() {
                     <Input
                       id="addressZip"
                       value={form.address.zip}
-                      onChange={(e) => updateAddress('zip', e.target.value)}
+                      onChange={(e) => updateAddress("zip", e.target.value)}
                       required
                       placeholder="94102"
                       maxLength={10}
@@ -444,22 +466,26 @@ export function OrderForm() {
                     <div
                       key={product.id}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors',
+                        "flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
                         qty > 0
-                          ? 'border-primary bg-primary/5'
-                          : 'border-input bg-background',
+                          ? "border-primary bg-primary/5"
+                          : "border-input bg-background",
                       )}
                     >
                       <button
                         type="button"
                         onClick={() => setQuantity(product.id, qty > 0 ? 0 : 1)}
                         className={cn(
-                          'flex size-5 shrink-0 items-center justify-center rounded border transition-colors',
+                          "flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
                           qty > 0
-                            ? 'border-primary bg-primary text-primary-foreground'
-                            : 'border-input bg-background',
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-input bg-background",
                         )}
-                        aria-label={qty > 0 ? `Remove ${product.name}` : `Add ${product.name}`}
+                        aria-label={
+                          qty > 0
+                            ? `Remove ${product.name}`
+                            : `Add ${product.name}`
+                        }
                       >
                         {qty > 0 ? (
                           <Minus className="size-3" />
@@ -534,7 +560,7 @@ export function OrderForm() {
                 </div>
                 <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-sm">
                   <span className="font-medium text-foreground">
-                    {totalCookies} {totalCookies === 1 ? 'cookie' : 'cookies'}
+                    {totalCookies} {totalCookies === 1 ? "cookie" : "cookies"}
                   </span>
                   {totalEstimate && (
                     <span className="font-semibold text-primary">
@@ -562,7 +588,7 @@ export function OrderForm() {
                   id="date"
                   type="date"
                   value={form.preferredDate}
-                  onChange={(e) => update('preferredDate', e.target.value)}
+                  onChange={(e) => update("preferredDate", e.target.value)}
                   min={today()}
                 />
               </div>
@@ -572,7 +598,7 @@ export function OrderForm() {
                   id="time"
                   type="time"
                   value={form.preferredTime}
-                  onChange={(e) => update('preferredTime', e.target.value)}
+                  onChange={(e) => update("preferredTime", e.target.value)}
                 />
               </div>
             </div>
@@ -592,7 +618,7 @@ export function OrderForm() {
               <Textarea
                 id="notes"
                 value={form.notes}
-                onChange={(e) => update('notes', e.target.value)}
+                onChange={(e) => update("notes", e.target.value)}
                 placeholder="Any special requests, dietary concerns, or notes..."
               />
             </div>
@@ -609,12 +635,14 @@ export function OrderForm() {
                       type="button"
                       role="checkbox"
                       aria-checked={form.allergyConfirmed}
-                      onClick={() => update('allergyConfirmed', !form.allergyConfirmed)}
+                      onClick={() =>
+                        update("allergyConfirmed", !form.allergyConfirmed)
+                      }
                       className={cn(
-                        'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border transition-colors',
+                        "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
                         form.allergyConfirmed
-                          ? 'border-amber-500 bg-amber-500 text-white'
-                          : 'border-amber-300 bg-white dark:border-amber-600 dark:bg-amber-950/40',
+                          ? "border-amber-500 bg-amber-500 text-white"
+                          : "border-amber-300 bg-white dark:border-amber-600 dark:bg-amber-950/40",
                       )}
                     >
                       {form.allergyConfirmed && <Check className="size-3.5" />}
@@ -647,11 +675,7 @@ export function OrderForm() {
             Submit Order Request
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <a
-              href={SOCIAL.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={SOCIAL.whatsapp} target="_blank" rel="noopener noreferrer">
               Message on WhatsApp
             </a>
           </Button>
