@@ -1,41 +1,67 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { AlertTriangle, Store, Truck } from 'lucide-react';
+import { AlertTriangle, Check, Minus, Plus, Store, Truck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SOCIAL } from '@/lib/constants';
 import { products } from '@/data/products';
+import { US_STATES, STATE_CITIES } from '@/data/locations';
+import { cn } from '@/lib/utils';
+
+interface AddressFields {
+  line1: string;
+  line2: string;
+  city: string;
+  state: string;
+  zip: string;
+}
 
 interface FormData {
   name: string;
   phone: string;
   email: string;
   pickupOrDelivery: 'pickup' | 'delivery';
-  deliveryAddress: string;
-  selectedCookies: string[];
-  quantity: number;
+  address: AddressFields;
+  quantities: Record<string, number>;
   preferredDate: string;
   preferredTime: string;
   notes: string;
   allergyConfirmed: boolean;
 }
 
+const initialAddress: AddressFields = {
+  line1: '',
+  line2: '',
+  city: '',
+  state: '',
+  zip: '',
+};
+
+const initialQuantities = Object.fromEntries(
+  products.map((p) => [p.id, 0]),
+);
+
 const initialForm: FormData = {
   name: '',
   phone: '',
   email: '',
   pickupOrDelivery: 'pickup',
-  deliveryAddress: '',
-  selectedCookies: [],
-  quantity: 1,
+  address: initialAddress,
+  quantities: initialQuantities,
   preferredDate: '',
   preferredTime: '',
   notes: '',
@@ -55,12 +81,17 @@ export function OrderForm() {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const toggleCookie = (id: string) => {
+  const updateAddress = (field: keyof AddressFields, value: string) => {
     setForm((prev) => ({
       ...prev,
-      selectedCookies: prev.selectedCookies.includes(id)
-        ? prev.selectedCookies.filter((c) => c !== id)
-        : [...prev.selectedCookies, id],
+      address: { ...prev.address, [field]: value },
+    }));
+  };
+
+  const setQuantity = (id: string, qty: number) => {
+    setForm((prev) => ({
+      ...prev,
+      quantities: { ...prev.quantities, [id]: Math.max(0, qty) },
     }));
   };
 
@@ -70,21 +101,28 @@ export function OrderForm() {
   };
 
   const selectedProducts = useMemo(
-    () => products.filter((p) => form.selectedCookies.includes(p.id)),
-    [form.selectedCookies],
+    () => products.filter((p) => (form.quantities[p.id] ?? 0) > 0),
+    [form.quantities],
+  );
+
+  const totalCookies = useMemo(
+    () => Object.values(form.quantities).reduce((a, b) => a + b, 0),
+    [form.quantities],
+  );
+
+  const citySuggestions = useMemo(
+    () => STATE_CITIES[form.address.state] ?? [],
+    [form.address.state],
   );
 
   const totalEstimate = useMemo(() => {
-    if (selectedProducts.length === 0 || form.quantity < 1) return null;
-    const qty = form.quantity;
-    if (selectedProducts.length === 1) {
-      return `~$${(selectedProducts[0].price * qty).toFixed(2)}`;
-    }
-    const min = Math.min(...selectedProducts.map((p) => p.price)) * qty;
-    const max = Math.max(...selectedProducts.map((p) => p.price)) * qty;
-    if (min === max) return `~$${min.toFixed(2)}`;
-    return `~$${min.toFixed(2)} – $${max.toFixed(2)}`;
-  }, [selectedProducts, form.quantity]);
+    if (selectedProducts.length === 0) return null;
+    const total = selectedProducts.reduce(
+      (sum, p) => sum + p.price * (form.quantities[p.id] ?? 0),
+      0,
+    );
+    return `~$${total.toFixed(2)}`;
+  }, [selectedProducts, form.quantities]);
 
   if (submitted) {
     return (
@@ -218,41 +256,130 @@ export function OrderForm() {
             </div>
 
             {form.pickupOrDelivery === 'delivery' && (
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="deliveryAddress">
+              <fieldset className="flex flex-col gap-4">
+                <legend className="text-sm font-medium text-foreground">
                   Delivery address <span className="text-primary">*</span>
-                </Label>
-                <Textarea
-                  id="deliveryAddress"
-                  value={form.deliveryAddress}
-                  onChange={(e) => update('deliveryAddress', e.target.value)}
-                  required
-                  placeholder="Street, city, ZIP code"
-                />
-              </div>
+                </legend>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="addressLine1">
+                    Street address
+                  </Label>
+                  <Input
+                    id="addressLine1"
+                    value={form.address.line1}
+                    onChange={(e) => updateAddress('line1', e.target.value)}
+                    required
+                    placeholder="123 Main St"
+                    autoComplete="address-line1"
+                  />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <Label htmlFor="addressLine2">
+                    Apt, suite, unit <span className="text-muted-foreground">(optional)</span>
+                  </Label>
+                  <Input
+                    id="addressLine2"
+                    value={form.address.line2}
+                    onChange={(e) => updateAddress('line2', e.target.value)}
+                    placeholder="Apt 4B"
+                    autoComplete="address-line2"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  <div className="min-w-0 flex-1 basis-[160px]">
+                    <Label htmlFor="addressCity">City</Label>
+                    <Select
+                      value={form.address.city}
+                      onValueChange={(value) => updateAddress('city', value)}
+                    >
+                      <SelectTrigger id="addressCity">
+                        <SelectValue placeholder={form.address.state ? 'Select city' : 'Select state first'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {citySuggestions.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-[130px] shrink-0">
+                    <Label htmlFor="addressState">State</Label>
+                    <Select
+                      value={form.address.state}
+                      onValueChange={(value) => updateAddress('state', value)}
+                    >
+                      <SelectTrigger id="addressState" className="px-2">
+                        <SelectValue placeholder="State" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {US_STATES.map((s) => (
+                          <SelectItem key={s.value} value={s.value}>
+                            <span className="font-medium">{s.label}</span>
+                            <span className="ml-1.5 text-muted-foreground">
+                              ({s.value})
+                            </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="w-[120px] shrink-0">
+                    <Label htmlFor="addressZip">ZIP</Label>
+                    <Input
+                      id="addressZip"
+                      value={form.address.zip}
+                      onChange={(e) => updateAddress('zip', e.target.value)}
+                      required
+                      placeholder="94102"
+                      maxLength={10}
+                      autoComplete="postal-code"
+                    />
+                  </div>
+                </div>
+              </fieldset>
             )}
 
-            {/* Cookie selection */}
+            {/* Cookie selection with per-product quantity */}
             <div className="flex flex-col gap-2">
               <Label className="text-sm font-medium text-foreground">
                 Select your cookies
               </Label>
               <div className="flex flex-col gap-2">
                 {products.map((product) => {
-                  const isSelected = form.selectedCookies.includes(product.id);
+                  const qty = form.quantities[product.id] ?? 0;
                   return (
-                    <Label
+                    <div
                       key={product.id}
-                      className="flex cursor-pointer items-center gap-3 rounded-lg border border-input bg-background px-4 py-3 transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors',
+                        qty > 0
+                          ? 'border-primary bg-primary/5'
+                          : 'border-input bg-background',
+                      )}
                     >
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleCookie(product.id)}
-                      />
+                      <button
+                        type="button"
+                        onClick={() => setQuantity(product.id, qty > 0 ? 0 : 1)}
+                        className={cn(
+                          'flex size-5 shrink-0 items-center justify-center rounded border transition-colors',
+                          qty > 0
+                            ? 'border-primary bg-primary text-primary-foreground'
+                            : 'border-input bg-background',
+                        )}
+                        aria-label={qty > 0 ? `Remove ${product.name}` : `Add ${product.name}`}
+                      >
+                        {qty > 0 ? (
+                          <Minus className="size-3" />
+                        ) : (
+                          <Plus className="size-3" />
+                        )}
+                      </button>
                       <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-serif text-sm font-bold text-primary">
                         {product.name.charAt(0)}
                       </div>
-                      <div className="flex flex-1 items-center justify-between">
+                      <div className="flex flex-1 items-center justify-between gap-2">
                         <span className="text-sm font-medium text-foreground">
                           {product.name}
                         </span>
@@ -260,50 +387,70 @@ export function OrderForm() {
                           ${product.price.toFixed(2)}
                         </span>
                       </div>
-                    </Label>
+                      {qty > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setQuantity(product.id, qty - 1)}
+                            className="flex size-7 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:text-foreground"
+                            aria-label={`Decrease ${product.name} quantity`}
+                          >
+                            <Minus className="size-3.5" />
+                          </button>
+                          <span className="w-8 text-center text-sm font-medium tabular-nums text-foreground">
+                            {qty}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setQuantity(product.id, qty + 1)}
+                            className="flex size-7 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:text-foreground"
+                            aria-label={`Increase ${product.name} quantity`}
+                          >
+                            <Plus className="size-3.5" />
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   );
                 })}
               </div>
             </div>
 
-            {/* Quantity + running total */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="quantity">
-                Total cookies
-              </Label>
-              <Input
-                id="quantity"
-                type="number"
-                min={1}
-                value={form.quantity}
-                onChange={(e) =>
-                  update('quantity', Math.max(1, parseInt(e.target.value) || 1))
-                }
-                className="max-w-[120px]"
-              />
-            </div>
-
-            {selectedProducts.length > 0 && form.quantity > 0 && (
+            {/* Order summary */}
+            {selectedProducts.length > 0 && (
               <div className="rounded-lg bg-muted px-4 py-3">
-                <p className="text-sm text-muted-foreground">
+                <div className="flex flex-col gap-2">
+                  {selectedProducts.map((p) => {
+                    const qty = form.quantities[p.id] ?? 0;
+                    if (qty === 0) return null;
+                    return (
+                      <div
+                        key={p.id}
+                        className="flex items-center justify-between text-sm"
+                      >
+                        <span className="text-muted-foreground">
+                          {p.name}
+                          <span className="mx-1 font-medium text-foreground">
+                            &times;{qty}
+                          </span>
+                        </span>
+                        <span className="font-medium text-foreground">
+                          ${(p.price * qty).toFixed(2)}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="mt-2 flex items-center justify-between border-t border-border pt-2 text-sm">
                   <span className="font-medium text-foreground">
-                    {selectedProducts.length}
-                  </span>{' '}
-                  {selectedProducts.length === 1 ? 'type' : 'types'} selected
-                  <span className="mx-1.5">&middot;</span>
-                  <span className="font-medium text-foreground">
-                    {form.quantity}
-                  </span>{' '}
-                  {form.quantity === 1 ? 'cookie' : 'cookies'}
+                    {totalCookies} {totalCookies === 1 ? 'cookie' : 'cookies'}
+                  </span>
                   {totalEstimate && (
-                    <>
-                      <span className="mx-1.5">&middot;</span>
-                      <span className="font-semibold text-primary">
-                        {totalEstimate}
-                      </span>
-                    </>
+                    <span className="font-semibold text-primary">
+                      {totalEstimate}
+                    </span>
                   )}
-                </p>
+                </div>
               </div>
             )}
           </CardContent>
@@ -367,15 +514,20 @@ export function OrderForm() {
                     Allergen notice
                   </p>
                   <div className="flex items-start gap-3">
-                    <Checkbox
-                      id="allergy"
-                      checked={form.allergyConfirmed}
-                      onCheckedChange={(checked) =>
-                        update('allergyConfirmed', checked === true)
-                      }
-                      required
-                      className="mt-0.5"
-                    />
+                    <button
+                      type="button"
+                      role="checkbox"
+                      aria-checked={form.allergyConfirmed}
+                      onClick={() => update('allergyConfirmed', !form.allergyConfirmed)}
+                      className={cn(
+                        'mt-0.5 flex size-5 shrink-0 items-center justify-center rounded border transition-colors',
+                        form.allergyConfirmed
+                          ? 'border-amber-500 bg-amber-500 text-white'
+                          : 'border-amber-300 bg-white dark:border-amber-600 dark:bg-amber-950/40',
+                      )}
+                    >
+                      {form.allergyConfirmed && <Check className="size-3.5" />}
+                    </button>
                     <Label
                       htmlFor="allergy"
                       className="text-sm leading-relaxed text-amber-700 dark:text-amber-400"

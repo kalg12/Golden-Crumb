@@ -9,29 +9,31 @@ import { Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
-import { useTheme } from '@/components/theme/ThemeProvider';
 import { SITE_NAME, NAV_LINKS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
-  const { theme } = useTheme();
-  const logoSrc =
-    theme === 'dark'
-      ? '/images/logos/GoldeCrumb-light.png'
-      : '/images/logos/GoldeCrumb-dark.png';
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-sm">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center">
           <Image
-            src={logoSrc}
+            src="/images/logos/GoldeCrumb-dark.png"
             alt={SITE_NAME}
             width={160}
             height={40}
-            className="h-9 w-auto sm:h-10"
+            className="h-9 w-auto sm:h-10 dark:hidden"
+            priority
+          />
+          <Image
+            src="/images/logos/GoldeCrumb-light.png"
+            alt={SITE_NAME}
+            width={160}
+            height={40}
+            className="hidden h-9 w-auto sm:h-10 dark:block"
             priority
           />
         </Link>
@@ -83,11 +85,19 @@ export function Navbar() {
               <div className="flex items-center justify-between border-b border-border px-5 py-4">
                 <Link href="/" onClick={() => setIsOpen(false)}>
                   <Image
-                    src={logoSrc}
+                    src="/images/logos/GoldeCrumb-dark.png"
                     alt={SITE_NAME}
                     width={140}
                     height={35}
-                    className="h-8 w-auto"
+                    className="h-8 w-auto dark:hidden"
+                    priority
+                  />
+                  <Image
+                    src="/images/logos/GoldeCrumb-light.png"
+                    alt={SITE_NAME}
+                    width={140}
+                    height={35}
+                    className="hidden h-8 w-auto dark:block"
                     priority
                   />
                 </Link>
