@@ -302,7 +302,7 @@ export function OrderForm() {
               >
                 <Label
                   htmlFor="pickup"
-                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:[&_svg]:text-primary"
+                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:[&_svg]:text-primary"
                 >
                   <RadioGroupItem
                     value="pickup"
@@ -316,7 +316,7 @@ export function OrderForm() {
                 </Label>
                 <Label
                   htmlFor="delivery"
-                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:[&_svg]:text-primary"
+                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:[&_svg]:text-primary"
                 >
                   <RadioGroupItem
                     value="delivery"
@@ -361,7 +361,7 @@ export function OrderForm() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <div className="w-[130px] shrink-0">
+                  <div className="w-32.5 shrink-0">
                     <Label htmlFor="addressState">State</Label>
                     <Select
                       value={form.address.state}
@@ -382,7 +382,7 @@ export function OrderForm() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="min-w-0 flex-1 basis-[160px]">
+                  <div className="min-w-0 flex-1 basis-40">
                     <Label
                       htmlFor="addressCity"
                       className={cn(
@@ -438,7 +438,7 @@ export function OrderForm() {
                       />
                     )}
                   </div>
-                  <div className="w-[120px] shrink-0">
+                  <div className="w-30 shrink-0">
                     <Label htmlFor="addressZip">ZIP</Label>
                     <Input
                       id="addressZip"
