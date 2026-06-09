@@ -82,10 +82,13 @@ export function OrderForm() {
   };
 
   const updateAddress = (field: keyof AddressFields, value: string) => {
-    setForm((prev) => ({
-      ...prev,
-      address: { ...prev.address, [field]: value },
-    }));
+    setForm((prev) => {
+      const next = { ...prev.address, [field]: value };
+      if (field === 'state') {
+        next.city = '';
+      }
+      return { ...prev, address: next };
+    });
   };
 
   const setQuantity = (id: string, qty: number) => {
@@ -287,10 +290,13 @@ export function OrderForm() {
                 </div>
                 <div className="flex flex-wrap gap-4">
                   <div className="min-w-0 flex-1 basis-[160px]">
-                    <Label htmlFor="addressCity">City</Label>
+                    <Label htmlFor="addressCity" className={cn(!form.address.state && 'text-muted-foreground')}>
+                      City
+                    </Label>
                     <Select
                       value={form.address.city}
                       onValueChange={(value) => updateAddress('city', value)}
+                      disabled={!form.address.state}
                     >
                       <SelectTrigger id="addressCity">
                         <SelectValue placeholder={form.address.state ? 'Select city' : 'Select state first'} />

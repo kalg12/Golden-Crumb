@@ -8,21 +8,24 @@ const SelectContext = React.createContext<{
   onChange: (value: string) => void;
   open: boolean;
   setOpen: (open: boolean) => void;
+  disabled: boolean;
 } | null>(null);
 
 function Select({
   value,
   onValueChange,
+  disabled = false,
   children,
 }: {
   value: string;
   onValueChange: (value: string) => void;
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = React.useState(false);
 
   return (
-    <SelectContext.Provider value={{ value, onChange: onValueChange, open, setOpen }}>
+    <SelectContext.Provider value={{ value, onChange: onValueChange, open, setOpen, disabled }}>
       <div className="relative">
         {children}
       </div>
@@ -41,7 +44,10 @@ function SelectTrigger({
     <button
       type="button"
       data-slot="select-trigger"
-      onClick={() => ctx?.setOpen(!ctx?.open)}
+      disabled={ctx?.disabled}
+      onClick={() => {
+        if (!ctx?.disabled) ctx?.setOpen(!ctx?.open);
+      }}
       className={cn(
         'flex h-8 w-full min-w-0 items-center justify-between gap-2 rounded-lg border border-input bg-transparent px-2.5 py-1 text-base transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30',
         className,
