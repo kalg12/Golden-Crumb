@@ -22,6 +22,12 @@ import { products } from '@/data/products';
 import { US_STATES } from '@/data/locations';
 import { cn } from '@/lib/utils';
 
+interface CityInfo {
+  city: string;
+  county: string;
+  population: number;
+}
+
 interface AddressFields {
   line1: string;
   line2: string;
@@ -113,10 +119,10 @@ export function OrderForm() {
     [form.quantities],
   );
 
-  const [cities, setCities] = useState<string[]>([]);
+  const [cities, setCities] = useState<CityInfo[]>([]);
   const [citiesLoading, setCitiesLoading] = useState(false);
   const [citiesError, setCitiesError] = useState(false);
-  const citiesCache = useRef<Record<string, string[]>>({});
+  const citiesCache = useRef<Record<string, CityInfo[]>>({});
 
   useEffect(() => {
     const state = form.address.state;
@@ -132,16 +138,15 @@ export function OrderForm() {
 
     let cancelled = false;
 
-    fetch(`https://api.zippopotam.us/us/${state}`)
+    fetch(`/api/cities?state=${state}`)
       .then((res) => {
         if (!res.ok) throw new Error('Failed to fetch');
-        return res.json() as Promise<{ places: { 'place name': string }[] }>;
+        return res.json() as Promise<{ cities: CityInfo[] }>;
       })
       .then((data) => {
         if (cancelled) return;
-        const unique = [...new Set(data.places.map((p) => p['place name']))].sort();
-        citiesCache.current[state] = unique;
-        setCities(unique);
+        citiesCache.current[state] = data.cities;
+        setCities(data.cities);
         setCitiesLoading(false);
       })
       .catch(() => {
@@ -154,6 +159,7 @@ export function OrderForm() {
   }, [form.address.state]);
 
   const citySuggestions = form.address.state ? cities : [];
+  const cityOptions = citySuggestions.map((c) => ({ name: c.city, county: c.county }));
 
   const totalEstimate = useMemo(() => {
     if (selectedProducts.length === 0) return null;
@@ -375,9 +381,14 @@ export function OrderForm() {
                         )}
                       </SelectTrigger>
                       <SelectContent>
-                        {citySuggestions.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
+                        {cityOptions.map((c) => (
+                          <SelectItem key={c.name} value={c.name}>
+                            {c.name}
+                            {c.county && (
+                              <span className="ml-1.5 text-muted-foreground">
+                                ({c.county})
+                              </span>
+                            )}
                           </SelectItem>
                         ))}
                       </SelectContent>
