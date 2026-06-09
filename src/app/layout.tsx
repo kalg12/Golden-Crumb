@@ -16,9 +16,20 @@ const playfairDisplay = Playfair_Display({
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 export const metadata: Metadata = {
-  title: 'Golden Crumb — Artisan Cookies',
+  title: {
+    default: 'Golden Crumb — Artisan Cookies',
+    template: '%s — Golden Crumb',
+  },
   description:
     'Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings.',
+  openGraph: {
+    title: 'Golden Crumb — Artisan Cookies',
+    description:
+      'Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings.',
+    siteName: 'Golden Crumb',
+    type: 'website',
+    locale: 'en_US',
+  },
 };
 
 const themeScript = `
@@ -43,6 +54,23 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'Bakery',
+              name: 'Golden Crumb',
+              description:
+                'Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings.',
+              url: 'https://goldencrumb.com',
+              telephone: '(555) 123-4567',
+              email: 'hello@goldencrumb.com',
+              areaServed: 'San Francisco, CA',
+              servesCuisine: 'American',
+            }),
+          }}
+        />
       </head>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>

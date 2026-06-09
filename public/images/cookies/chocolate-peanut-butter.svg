@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <defs>
+    <radialGradient id="cpbBg" cx="45%" cy="40%" r="60%">
+      <stop offset="0%" stop-color="#C8924A"/>
+      <stop offset="100%" stop-color="#A07030"/>
+    </radialGradient>
+  </defs>
+  <ellipse cx="200" cy="280" rx="140" ry="14" fill="#1F0E08" opacity="0.15"/>
+  <circle cx="200" cy="145" r="130" fill="url(#cpbBg)"/>
+  <path d="M140 100 Q180 160 260 110 Q220 180 140 100Z" fill="#4A2810" opacity="0.3"/>
+  <path d="M130 170 Q170 200 250 160 Q210 220 130 170Z" fill="#4A2810" opacity="0.25"/>
+  <path d="M160 80 Q200 130 270 90 Q230 150 160 80Z" fill="#4A2810" opacity="0.2"/>
+  <circle cx="160" cy="125" r="13" fill="#5A3A1A"/>
+  <circle cx="240" cy="140" r="11" fill="#5A3A1A"/>
+  <circle cx="190" cy="195" r="12" fill="#5A3A1A"/>
+  <circle cx="140" cy="195" r="10" fill="#5A3A1A"/>
+  <circle cx="255" cy="195" r="10" fill="#5A3A1A"/>
+  <circle cx="220" cy="115" r="9" fill="#5A3A1A"/>
+</svg>

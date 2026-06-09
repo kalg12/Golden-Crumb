@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 import type { Product } from '@/data/products';
 import { Card, CardContent } from '@/components/ui/card';
@@ -10,11 +11,15 @@ interface CookieCardProps {
 
 export function CookieCard({ product }: CookieCardProps) {
   return (
-    <Card className="group flex h-full flex-col overflow-hidden">
-      <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
-        <span className="font-serif text-5xl text-primary/60">
-          {product.name.charAt(0)}
-        </span>
+    <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+      <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/30 to-primary/10">
+        <Image
+          src={product.image}
+          alt={product.name}
+          fill
+          className="object-contain p-4"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+        />
       </div>
       <CardContent className="flex flex-1 flex-col p-5">
         <h3 className="font-serif text-xl font-bold text-foreground">

@@ -19,6 +19,7 @@ export const NAV_LINKS = [
   { href: '/menu', label: 'Menu' },
   { href: '/order', label: 'Order' },
   { href: '/faq', label: 'FAQ' },
+  { href: '/allergens', label: 'Allergens' },
 ] as const;
 
 export const ALLERGEN_NOTICE =

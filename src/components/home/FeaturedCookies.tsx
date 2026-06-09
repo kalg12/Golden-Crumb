@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { Container } from '@/components/shared/Container';
 import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
@@ -20,11 +21,15 @@ export function FeaturedCookies() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((cookie, i) => (
             <RevealOnScroll key={cookie.id} delay={i * 100}>
-              <Card className="group flex h-full flex-col overflow-hidden">
-              <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
-                <span className="font-serif text-5xl text-primary/60">
-                  {cookie.name.charAt(0)}
-                </span>
+              <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/30 to-primary/10">
+                <Image
+                  src={cookie.image}
+                  alt={cookie.name}
+                  fill
+                  className="object-contain p-4"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
               </div>
               <CardContent className="flex flex-1 flex-col p-5">
                 <h3 className="font-serif text-xl font-bold text-foreground">

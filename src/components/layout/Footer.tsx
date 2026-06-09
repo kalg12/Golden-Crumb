@@ -112,6 +112,14 @@ export function Footer() {
                   WhatsApp
                 </a>
               </li>
+              <li>
+                <Link
+                  href="/allergens"
+                  className="transition-colors hover:text-primary"
+                >
+                  Allergen Info
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
