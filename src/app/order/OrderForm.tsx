@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AlertTriangle, Check, Loader2, Minus, Plus, Store, Truck } from 'lucide-react';
+import { AlertTriangle, Check, Minus, Plus, Store, Truck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,6 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SOCIAL } from '@/lib/constants';
@@ -158,8 +166,18 @@ export function OrderForm() {
     return () => { cancelled = true; };
   }, [form.address.state]);
 
-  const citySuggestions = form.address.state ? cities : [];
-  const cityOptions = citySuggestions.map((c) => ({ name: c.city, county: c.county }));
+  const citySuggestions = useMemo(
+    () => (form.address.state ? cities : []),
+    [form.address.state, cities],
+  );
+  const cityOptions = useMemo(
+    () => citySuggestions.map((city) => city.city),
+    [citySuggestions],
+  );
+  const cityByName = useMemo(
+    () => new Map(citySuggestions.map((city) => [city.city, city])),
+    [citySuggestions],
+  );
 
   const totalEstimate = useMemo(() => {
     if (selectedProducts.length === 0) return null;
@@ -357,42 +375,46 @@ export function OrderForm() {
                     <Label htmlFor="addressCity" className={cn(!form.address.state && 'text-muted-foreground')}>
                       City
                     </Label>
-                    <Select
-                      value={form.address.city}
-                      onValueChange={(value) => updateAddress('city', value)}
-                      disabled={!form.address.state || citiesLoading}
-                    >
-                      <SelectTrigger id="addressCity">
-                        {citiesLoading ? (
-                          <span className="flex items-center gap-2 text-muted-foreground">
-                            <Loader2 className="size-3.5 animate-spin" />
-                            Loading...
-                          </span>
-                        ) : (
-                          <SelectValue
-                            placeholder={
-                              citiesError
-                                ? 'Failed to load'
-                                : form.address.state
-                                  ? 'Select city'
-                                  : 'Select state first'
-                            }
-                          />
-                        )}
-                      </SelectTrigger>
-                      <SelectContent>
-                        {cityOptions.map((c) => (
-                          <SelectItem key={c.name} value={c.name}>
-                            {c.name}
-                            {c.county && (
-                              <span className="ml-1.5 text-muted-foreground">
-                                ({c.county})
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    {form.address.state ? (
+                      <Combobox
+                        items={cityOptions}
+                        value={form.address.city || null}
+                        onValueChange={(city: string | null) => updateAddress('city', city ?? '')}
+                        disabled={citiesLoading}
+                      >
+                        <ComboboxInput
+                          id="addressCity"
+                          placeholder={citiesLoading ? 'Loading...' : 'Search cities...'}
+                          disabled={citiesLoading}
+                          showClear
+                        />
+                        <ComboboxContent>
+                          <ComboboxEmpty>No cities found.</ComboboxEmpty>
+                          <ComboboxList>
+                            {(cityName: string) => {
+                              const cityInfo = cityByName.get(cityName);
+
+                              return (
+                                <ComboboxItem key={cityName} value={cityName}>
+                                  {cityName}
+                                  {cityInfo?.county && (
+                                  <span className="ml-1.5 text-muted-foreground">
+                                    ({cityInfo.county})
+                                  </span>
+                                  )}
+                                </ComboboxItem>
+                              );
+                            }}
+                          </ComboboxList>
+                        </ComboboxContent>
+                      </Combobox>
+                    ) : (
+                      <Input
+                        id="addressCity"
+                        placeholder={citiesError ? 'Failed to load' : 'Select state first'}
+                        disabled
+                      />
+                    )}
                   </div>
                   <div className="w-[120px] shrink-0">
                     <Label htmlFor="addressZip">ZIP</Label>
