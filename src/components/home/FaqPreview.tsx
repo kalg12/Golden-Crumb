@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/shared/Container';
+import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,8 +33,9 @@ export function FaqPreview() {
           subtitle="Quick answers to common questions."
         />
         <div className="mx-auto flex max-w-3xl flex-col gap-6">
-          {faqs.map((faq) => (
-            <Card key={faq.question}>
+          {faqs.map((faq, i) => (
+            <RevealOnScroll key={faq.question} delay={i * 120}>
+            <Card>
               <CardContent className="p-6">
                 <h3 className="font-serif text-lg font-bold text-foreground">
                   {faq.question}
@@ -43,6 +45,7 @@ export function FaqPreview() {
                 </p>
               </CardContent>
             </Card>
+            </RevealOnScroll>
           ))}
         </div>
         <div className="mt-8 text-center">

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { Container } from '@/components/shared/Container';
+import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,8 +18,9 @@ export function FeaturedCookies() {
           subtitle="Handcrafted with premium ingredients, baked fresh daily."
         />
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {featured.map((cookie) => (
-            <Card key={cookie.id} className="group flex flex-col overflow-hidden">
+          {featured.map((cookie, i) => (
+            <RevealOnScroll key={cookie.id} delay={i * 100}>
+              <Card className="group flex flex-col overflow-hidden">
               <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
                 <span className="font-serif text-5xl text-primary/60">
                   {cookie.name.charAt(0)}
@@ -41,6 +43,7 @@ export function FeaturedCookies() {
                 </div>
               </CardContent>
             </Card>
+            </RevealOnScroll>
           ))}
         </div>
       </Container>

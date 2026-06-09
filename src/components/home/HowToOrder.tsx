@@ -1,4 +1,5 @@
 import { Container } from '@/components/shared/Container';
+import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 
 const steps = [
@@ -31,8 +32,9 @@ export function HowToOrder() {
           subtitle="Enjoying Golden Crumb cookies is easy."
         />
         <div className="grid gap-8 sm:grid-cols-3">
-          {steps.map((step) => (
-            <div key={step.number} className="text-center">
+          {steps.map((step, i) => (
+            <RevealOnScroll key={step.number} delay={i * 150}>
+            <div className="text-center">
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-primary/20">
                 <span className="font-serif text-xl font-bold text-primary">
                   {step.number}
@@ -45,6 +47,7 @@ export function HowToOrder() {
                 {step.description}
               </p>
             </div>
+            </RevealOnScroll>
           ))}
         </div>
       </Container>
