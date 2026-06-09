@@ -1,7 +1,7 @@
 'use client';
 
-import { useMemo, useState } from 'react';
-import { AlertTriangle, Check, Minus, Plus, Store, Truck } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AlertTriangle, Check, Loader2, Minus, Plus, Store, Truck } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,7 +19,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { RevealOnScroll } from '@/components/shared/RevealOnScroll';
 import { SOCIAL } from '@/lib/constants';
 import { products } from '@/data/products';
-import { US_STATES, STATE_CITIES } from '@/data/locations';
+import { US_STATES } from '@/data/locations';
 import { cn } from '@/lib/utils';
 
 interface AddressFields {
@@ -113,10 +113,47 @@ export function OrderForm() {
     [form.quantities],
   );
 
-  const citySuggestions = useMemo(
-    () => STATE_CITIES[form.address.state] ?? [],
-    [form.address.state],
-  );
+  const [cities, setCities] = useState<string[]>([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [citiesError, setCitiesError] = useState(false);
+  const citiesCache = useRef<Record<string, string[]>>({});
+
+  useEffect(() => {
+    const state = form.address.state;
+    if (!state) return;
+
+    if (citiesCache.current[state]) {
+      setCities(citiesCache.current[state]);
+      return;
+    }
+
+    setCitiesLoading(true);
+    setCitiesError(false);
+
+    let cancelled = false;
+
+    fetch(`https://api.zippopotam.us/us/${state}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('Failed to fetch');
+        return res.json() as Promise<{ places: { 'place name': string }[] }>;
+      })
+      .then((data) => {
+        if (cancelled) return;
+        const unique = [...new Set(data.places.map((p) => p['place name']))].sort();
+        citiesCache.current[state] = unique;
+        setCities(unique);
+        setCitiesLoading(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setCitiesError(true);
+        setCitiesLoading(false);
+      });
+
+    return () => { cancelled = true; };
+  }, [form.address.state]);
+
+  const citySuggestions = form.address.state ? cities : [];
 
   const totalEstimate = useMemo(() => {
     if (selectedProducts.length === 0) return null;
@@ -289,27 +326,6 @@ export function OrderForm() {
                   />
                 </div>
                 <div className="flex flex-wrap gap-4">
-                  <div className="min-w-0 flex-1 basis-[160px]">
-                    <Label htmlFor="addressCity" className={cn(!form.address.state && 'text-muted-foreground')}>
-                      City
-                    </Label>
-                    <Select
-                      value={form.address.city}
-                      onValueChange={(value) => updateAddress('city', value)}
-                      disabled={!form.address.state}
-                    >
-                      <SelectTrigger id="addressCity">
-                        <SelectValue placeholder={form.address.state ? 'Select city' : 'Select state first'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {citySuggestions.map((c) => (
-                          <SelectItem key={c} value={c}>
-                            {c}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
                   <div className="w-[130px] shrink-0">
                     <Label htmlFor="addressState">State</Label>
                     <Select
@@ -326,6 +342,42 @@ export function OrderForm() {
                             <span className="ml-1.5 text-muted-foreground">
                               ({s.value})
                             </span>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="min-w-0 flex-1 basis-[160px]">
+                    <Label htmlFor="addressCity" className={cn(!form.address.state && 'text-muted-foreground')}>
+                      City
+                    </Label>
+                    <Select
+                      value={form.address.city}
+                      onValueChange={(value) => updateAddress('city', value)}
+                      disabled={!form.address.state || citiesLoading}
+                    >
+                      <SelectTrigger id="addressCity">
+                        {citiesLoading ? (
+                          <span className="flex items-center gap-2 text-muted-foreground">
+                            <Loader2 className="size-3.5 animate-spin" />
+                            Loading...
+                          </span>
+                        ) : (
+                          <SelectValue
+                            placeholder={
+                              citiesError
+                                ? 'Failed to load'
+                                : form.address.state
+                                  ? 'Select city'
+                                  : 'Select state first'
+                            }
+                          />
+                        )}
+                      </SelectTrigger>
+                      <SelectContent>
+                        {citySuggestions.map((c) => (
+                          <SelectItem key={c} value={c}>
+                            {c}
                           </SelectItem>
                         ))}
                       </SelectContent>
