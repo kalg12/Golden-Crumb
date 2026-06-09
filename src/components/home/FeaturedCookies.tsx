@@ -20,7 +20,7 @@ export function FeaturedCookies() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featured.map((cookie, i) => (
             <RevealOnScroll key={cookie.id} delay={i * 100}>
-              <Card className="group flex flex-col overflow-hidden">
+              <Card className="group flex h-full flex-col overflow-hidden">
               <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
                 <span className="font-serif text-5xl text-primary/60">
                   {cookie.name.charAt(0)}

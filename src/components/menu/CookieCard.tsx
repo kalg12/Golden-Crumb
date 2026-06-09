@@ -10,7 +10,7 @@ interface CookieCardProps {
 
 export function CookieCard({ product }: CookieCardProps) {
   return (
-    <Card className="group flex flex-col overflow-hidden">
+    <Card className="group flex h-full flex-col overflow-hidden">
       <div className="aspect-[4/3] flex items-center justify-center bg-gradient-to-br from-primary/30 to-primary/10">
         <span className="font-serif text-5xl text-primary/60">
           {product.name.charAt(0)}
@@ -20,18 +20,20 @@ export function CookieCard({ product }: CookieCardProps) {
         <h3 className="font-serif text-xl font-bold text-foreground">
           {product.name}
         </h3>
-        <p className="mt-1 flex-1 text-sm leading-relaxed text-secondary-foreground">
-          {product.description}
-        </p>
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          {product.allergens?.map((allergen) => (
-            <span
-              key={allergen}
-              className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
-            >
-              {allergen}
-            </span>
-          ))}
+        <div className="mt-1 flex flex-1 flex-col justify-between gap-2">
+          <p className="text-sm leading-relaxed text-secondary-foreground">
+            {product.description}
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {product.allergens?.map((allergen) => (
+              <span
+                key={allergen}
+                className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary"
+              >
+                {allergen}
+              </span>
+            ))}
+          </div>
         </div>
         <div className="mt-4 flex items-center justify-between">
           <span className="text-xl font-bold text-primary">
