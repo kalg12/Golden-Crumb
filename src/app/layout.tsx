@@ -79,6 +79,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={cn(playfairDisplay.variable, "font-sans", geist.variable)}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>

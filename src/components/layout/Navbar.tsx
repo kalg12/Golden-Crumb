@@ -20,22 +20,24 @@ export function Navbar() {
     <header className="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-sm">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Link href="/" className="flex shrink-0 items-center">
-          <Image
-            src="/images/logos/GoldeCrumb-dark.png"
-            alt={SITE_NAME}
-            width={160}
-            height={40}
-            className="h-9 w-auto sm:h-10 dark:hidden"
-            priority
-          />
-          <Image
-            src="/images/logos/GoldeCrumb-light.png"
-            alt={SITE_NAME}
-            width={160}
-            height={40}
-            className="hidden h-9 w-auto sm:h-10 dark:block"
-            priority
-          />
+          <div className="relative h-9 w-36 sm:h-10 sm:w-40">
+            <Image
+              src="/images/logos/GoldeCrumb-dark.png"
+              alt={SITE_NAME}
+              fill
+              className="object-contain object-left dark:hidden"
+              priority
+              sizes="160px"
+            />
+            <Image
+              src="/images/logos/GoldeCrumb-light.png"
+              alt={SITE_NAME}
+              fill
+              className="object-contain object-left hidden dark:block"
+              priority
+              sizes="160px"
+            />
+          </div>
         </Link>
 
         <div className="flex items-center gap-1">
@@ -78,28 +80,31 @@ export function Navbar() {
             <SheetContent
               side="right"
               showCloseButton={false}
+              aria-describedby={undefined}
               className="flex !w-[85vw] max-w-[360px] flex-col rounded-l-2xl border-l border-border bg-card p-0"
             >
               <SheetTitle className="sr-only">Navigation menu</SheetTitle>
 
               <div className="flex items-center justify-between border-b border-border px-5 py-4">
                 <Link href="/" onClick={() => setIsOpen(false)}>
-                  <Image
-                    src="/images/logos/GoldeCrumb-dark.png"
-                    alt={SITE_NAME}
-                    width={140}
-                    height={35}
-                    className="h-8 w-auto dark:hidden"
-                    priority
-                  />
-                  <Image
-                    src="/images/logos/GoldeCrumb-light.png"
-                    alt={SITE_NAME}
-                    width={140}
-                    height={35}
-                    className="hidden h-8 w-auto dark:block"
-                    priority
-                  />
+                  <div className="relative h-8 w-32">
+                    <Image
+                      src="/images/logos/GoldeCrumb-dark.png"
+                      alt={SITE_NAME}
+                      fill
+                      className="object-contain object-left dark:hidden"
+                      priority
+                      sizes="128px"
+                    />
+                    <Image
+                      src="/images/logos/GoldeCrumb-light.png"
+                      alt={SITE_NAME}
+                      fill
+                      className="object-contain object-left hidden dark:block"
+                      priority
+                      sizes="128px"
+                    />
+                  </div>
                 </Link>
                 <Button
                   variant="ghost"
