@@ -16,6 +16,7 @@ export default function AllergensPage() {
     <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
+          as="h1"
           title="Allergen Information"
           subtitle="We believe in transparency. Here is everything you need to know about allergens in our cookies."
         />

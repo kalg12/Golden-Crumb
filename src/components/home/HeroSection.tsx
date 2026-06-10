@@ -1,7 +1,7 @@
 import Link from 'next/link';
 
 import { Button } from '@/components/ui/button';
-import { SITE_TAGLINE, SITE_DESCRIPTION } from '@/lib/constants';
+import { SITE_TAGLINE } from '@/lib/constants';
 
 function CookieVisual() {
   return (
@@ -73,7 +73,7 @@ export function HeroSection() {
               {SITE_TAGLINE}
             </p>
             <h1 className="font-serif text-4xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
-              {SITE_DESCRIPTION}
+              Golden Crumb: Artisan Cookies in San Francisco
             </h1>
             <p className="mt-6 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
               Small-batch cookies baked fresh daily in San Francisco. Perfect for

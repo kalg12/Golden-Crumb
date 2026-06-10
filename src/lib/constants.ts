@@ -2,6 +2,7 @@ export const SITE_NAME = 'Golden Crumb';
 export const SITE_TAGLINE = 'Artisan Cookies';
 export const SITE_DESCRIPTION =
   'Freshly baked artisan cookies made for sweet moments, thoughtful gifts, and everyday cravings.';
+export const SITE_URL = 'https://goldencrumb.com';
 
 export const SOCIAL = {
   instagram: 'https://instagram.com/goldencrumb',

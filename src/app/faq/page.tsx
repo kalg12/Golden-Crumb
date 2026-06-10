@@ -1,3 +1,5 @@
+import type { Metadata } from 'next';
+
 import { Container } from '@/components/shared/Container';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import {
@@ -7,18 +9,50 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { SOCIAL, CONTACT } from '@/lib/constants';
+import { SOCIAL, CONTACT, SITE_URL } from '@/lib/constants';
+
+export const metadata: Metadata = {
+  title: 'FAQ',
+  description:
+    'Frequently asked questions about Golden Crumb artisan cookies in San Francisco. Learn how to order, pickup, delivery, allergens, and more.',
+  openGraph: {
+    title: 'FAQ — Golden Crumb',
+    description:
+      'Frequently asked questions about Golden Crumb artisan cookies in San Francisco.',
+    url: `${SITE_URL}/faq`,
+  },
+};
 
 const faqs = [
+  {
+    question: 'Where is Golden Crumb located?',
+    answer:
+      'Golden Crumb is based in San Francisco, CA. We offer local pickup and delivery throughout the city.',
+  },
   {
     question: 'How do I place an order?',
     answer:
       'Visit our Order page and fill out the order form. We&rsquo;ll review your request and confirm it manually via email or phone.',
   },
   {
+    question: 'Do you offer cookies for gifts or events?',
+    answer:
+      'Yes! We cater events, parties, and corporate gatherings. Our cookies make thoughtful gifts for any occasion. Contact us with your needs and we&rsquo;ll create a custom order.',
+  },
+  {
     question: 'Do you offer pickup or delivery?',
     answer:
       'Both! You can choose pickup or delivery when placing your order. Delivery is available within San Francisco and may vary by location and date.',
+  },
+  {
+    question: 'How fresh are the cookies?',
+    answer:
+      'We bake every batch fresh to order using premium ingredients — real butter, fresh eggs, and high-quality chocolate. Your cookies are made and delivered at peak freshness.',
+  },
+  {
+    question: 'Can I contact Golden Crumb through WhatsApp?',
+    answer:
+      'Yes! Message us on WhatsApp to place an order or ask questions. You can also reach us on Instagram or email at hello@goldencrumb.com.',
   },
   {
     question: 'How will I know my order is confirmed?',
@@ -31,7 +65,7 @@ const faqs = [
       'Payment is handled at pickup or delivery. We accept cash, card, and digital payments. For large orders, we may request a deposit.',
   },
   {
-    question: 'What are the allergens in your cookies?',
+    question: 'Do your cookies contain allergens?',
     answer:
       'Our cookies may contain milk, eggs, wheat, soy, peanuts, or tree nuts. Each product page lists specific allergens. Please contact us if you have concerns.',
   },
@@ -52,11 +86,29 @@ const faqs = [
   },
 ];
 
+const faqSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: faqs.map((faq) => ({
+    '@type': 'Question',
+    name: faq.question,
+    acceptedAnswer: {
+      '@type': 'Answer',
+      text: faq.answer,
+    },
+  })),
+};
+
 export default function FaqPage() {
   return (
     <main className="flex-1 py-14 sm:py-20 lg:py-24">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <Container>
         <SectionHeader
+          as="h1"
           title="Frequently Asked Questions"
           subtitle="Everything you need to know about ordering from Golden Crumb."
         />

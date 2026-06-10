@@ -1,0 +1,24 @@
+# Golden Crumb
+> Artisan Cookies in San Francisco
+
+Golden Crumb is an artisan cookie brand based in San Francisco, CA. We bake small-batch cookies fresh daily using premium ingredients — real butter, fresh eggs, and high-quality chocolate. Our cookies are perfect for everyday treats, thoughtful gifts, and sweet moments.
+
+## Pages
+
+- Home: https://goldencrumb.com/
+- Menu: https://goldencrumb.com/menu
+- Order: https://goldencrumb.com/order
+- FAQ: https://goldencrumb.com/faq
+- Allergen Info: https://goldencrumb.com/allergens
+
+## Contact
+
+- Email: hello@goldencrumb.com
+- Phone: (555) 123-4567
+- Location: San Francisco, CA
+- Instagram: https://instagram.com/goldencrumb
+- WhatsApp: https://wa.me/15551234567
+
+## Summary
+
+Golden Crumb offers freshly baked artisan cookies made in small batches. We serve San Francisco with pickup and delivery options. Cookies are handcrafted with premium ingredients and baked fresh to order.
