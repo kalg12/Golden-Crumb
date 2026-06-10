@@ -459,74 +459,63 @@ export function OrderForm() {
               <Label className="text-sm font-medium text-foreground">
                 Select your cookies
               </Label>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {products.map((product) => {
                   const qty = form.quantities[product.id] ?? 0;
                   return (
                     <div
                       key={product.id}
                       className={cn(
-                        "flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
+                        'rounded-xl border p-4 transition-colors sm:flex sm:items-center sm:gap-4 sm:p-5',
                         qty > 0
-                          ? "border-primary bg-primary/5"
-                          : "border-input bg-background",
+                          ? 'border-primary bg-primary/5'
+                          : 'border-input bg-background',
                       )}
                     >
-                      <button
-                        type="button"
-                        onClick={() => setQuantity(product.id, qty > 0 ? 0 : 1)}
-                        className={cn(
-                          "flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
-                          qty > 0
-                            ? "border-primary bg-primary text-primary-foreground"
-                            : "border-input bg-background",
-                        )}
-                        aria-label={
-                          qty > 0
-                            ? `Remove ${product.name}`
-                            : `Add ${product.name}`
-                        }
-                      >
-                        {qty > 0 ? (
-                          <Minus className="size-3" />
-                        ) : (
-                          <Plus className="size-3" />
-                        )}
-                      </button>
-                      <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-serif text-sm font-bold text-primary">
-                        {product.name.charAt(0)}
-                      </div>
-                      <div className="flex flex-1 items-center justify-between gap-2">
-                        <span className="text-sm font-medium text-foreground">
-                          {product.name}
-                        </span>
-                        <span className="text-sm font-semibold text-primary">
+                      {/* Top row: icon + name + price (mobile), single row on desktop */}
+                      <div className="flex items-center gap-3 sm:flex-1">
+                        <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/15 font-serif text-sm font-bold text-primary">
+                          {product.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-foreground">
+                            {product.name}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-sm font-semibold text-primary">
                           ${product.price.toFixed(2)}
                         </span>
                       </div>
-                      {qty > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <button
+
+                      {/* Bottom row: quantity selector */}
+                      <div className="mt-3 flex justify-end sm:mt-0 sm:shrink-0">
+                        <div className="flex items-center gap-2 rounded-xl border bg-background px-1 py-1">
+                          <Button
                             type="button"
+                            variant="outline"
+                            size="icon-lg"
+                            className="rounded-full"
+                            disabled={qty === 0}
                             onClick={() => setQuantity(product.id, qty - 1)}
-                            className="flex size-7 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:text-foreground"
                             aria-label={`Decrease ${product.name} quantity`}
                           >
-                            <Minus className="size-3.5" />
-                          </button>
-                          <span className="w-8 text-center text-sm font-medium tabular-nums text-foreground">
+                            <Minus />
+                          </Button>
+                          <span className="flex min-w-8 items-center justify-center text-sm font-semibold tabular-nums text-foreground">
                             {qty}
                           </span>
-                          <button
+                          <Button
                             type="button"
+                            variant="default"
+                            size="icon-lg"
+                            className="rounded-full"
                             onClick={() => setQuantity(product.id, qty + 1)}
-                            className="flex size-7 items-center justify-center rounded-md border border-input bg-background text-muted-foreground transition-colors hover:text-foreground"
                             aria-label={`Increase ${product.name} quantity`}
                           >
-                            <Plus className="size-3.5" />
-                          </button>
+                            <Plus />
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
