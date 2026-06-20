@@ -1,39 +1,45 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, Minus, Plus, Store, Truck } from "lucide-react";
+import { AlertTriangle, Check, MapPin, Minus, Plus, Truck } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-} from "@/components/ui/combobox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
 import { SOCIAL } from "@/lib/constants";
 import { products } from "@/data/products";
-import { US_STATES } from "@/data/locations";
 import { cn } from "@/lib/utils";
 
-interface CityInfo {
-  city: string;
-  county: string;
-  population: number;
+interface LeafletIcon {
+  _leaflet_id?: number;
+}
+
+interface LeafletMarker {
+  setLatLng: (coords: [number, number]) => void;
+  getLatLng: () => { lat: number; lng: number };
+  on: (event: string, callback: () => void) => void;
+}
+
+interface LeafletMap {
+  remove: () => void;
+  on: (
+    event: string,
+    callback: (e: { latlng: { lat: number; lng: number } }) => void
+  ) => void;
+}
+
+interface LeafletWindow extends Window {
+  L?: {
+    map: (el: HTMLDivElement, options: { center: number[]; zoom: number; zoomControl: boolean }) => LeafletMap;
+    tileLayer: (url: string, options: { attribution: string }) => { addTo: (map: LeafletMap) => void };
+    divIcon: (options: { html: string; className: string; iconSize: number[]; iconAnchor: number[] }) => LeafletIcon;
+    marker: (coords: number[], options: { icon: LeafletIcon; draggable: boolean }) => {
+      addTo: (map: LeafletMap) => LeafletMarker;
+    };
+  };
 }
 
 interface AddressFields {
@@ -50,6 +56,7 @@ interface FormData {
   email: string;
   pickupOrDelivery: "pickup" | "delivery";
   address: AddressFields;
+  addressReference?: string;
   quantities: Record<string, number>;
   preferredDate: string;
   preferredTime: string;
@@ -60,8 +67,8 @@ interface FormData {
 const initialAddress: AddressFields = {
   line1: "",
   line2: "",
-  city: "",
-  state: "",
+  city: "San Francisco",
+  state: "CA",
   zip: "",
 };
 
@@ -71,8 +78,9 @@ const initialForm: FormData = {
   name: "",
   phone: "",
   email: "",
-  pickupOrDelivery: "pickup",
+  pickupOrDelivery: "delivery",
   address: initialAddress,
+  addressReference: "",
   quantities: initialQuantities,
   preferredDate: "",
   preferredTime: "",
@@ -94,13 +102,10 @@ export function OrderForm() {
   };
 
   const updateAddress = (field: keyof AddressFields, value: string) => {
-    setForm((prev) => {
-      const next = { ...prev.address, [field]: value };
-      if (field === "state") {
-        next.city = "";
-      }
-      return { ...prev, address: next };
-    });
+    setForm((prev) => ({
+      ...prev,
+      address: { ...prev.address, [field]: value },
+    }));
   };
 
   const setQuantity = (id: string, qty: number) => {
@@ -125,60 +130,6 @@ export function OrderForm() {
     [form.quantities],
   );
 
-  const [cities, setCities] = useState<CityInfo[]>([]);
-  const [citiesLoading, setCitiesLoading] = useState(false);
-  const [citiesError, setCitiesError] = useState(false);
-  const citiesCache = useRef<Record<string, CityInfo[]>>({});
-
-  useEffect(() => {
-    const state = form.address.state;
-    if (!state) return;
-
-    if (citiesCache.current[state]) {
-      setCities(citiesCache.current[state]);
-      return;
-    }
-
-    setCitiesLoading(true);
-    setCitiesError(false);
-
-    let cancelled = false;
-
-    fetch(`/api/cities?state=${state}`)
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch");
-        return res.json() as Promise<{ cities: CityInfo[] }>;
-      })
-      .then((data) => {
-        if (cancelled) return;
-        citiesCache.current[state] = data.cities;
-        setCities(data.cities);
-        setCitiesLoading(false);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setCitiesError(true);
-        setCitiesLoading(false);
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [form.address.state]);
-
-  const citySuggestions = useMemo(
-    () => (form.address.state ? cities : []),
-    [form.address.state, cities],
-  );
-  const cityOptions = useMemo(
-    () => citySuggestions.map((city) => city.city),
-    [citySuggestions],
-  );
-  const cityByName = useMemo(
-    () => new Map(citySuggestions.map((city) => [city.city, city])),
-    [citySuggestions],
-  );
-
   const totalEstimate = useMemo(() => {
     if (selectedProducts.length === 0) return null;
     const total = selectedProducts.reduce(
@@ -187,6 +138,132 @@ export function OrderForm() {
     );
     return `~$${total.toFixed(2)}`;
   }, [selectedProducts, form.quantities]);
+
+  const [mapLoaded, setMapLoaded] = useState(false);
+  const mapRef = useRef<LeafletMap | null>(null);
+  const markerRef = useRef<LeafletMarker | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+
+  // Dynamically load Leaflet styles and script on client side
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    if ((window as unknown as LeafletWindow).L) {
+      setTimeout(() => setMapLoaded(true), 0);
+      return;
+    }
+
+    const cssId = "leaflet-css";
+    if (!document.getElementById(cssId)) {
+      const link = document.createElement("link");
+      link.id = cssId;
+      link.rel = "stylesheet";
+      link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+      document.head.appendChild(link);
+    }
+
+    const jsId = "leaflet-js";
+    if (!document.getElementById(jsId)) {
+      const script = document.createElement("script");
+      script.id = jsId;
+      script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+      script.onload = () => {
+        setMapLoaded(true);
+      };
+      document.head.appendChild(script);
+    } else {
+      const interval = setInterval(() => {
+        if ((window as unknown as LeafletWindow).L) {
+          setMapLoaded(true);
+          clearInterval(interval);
+        }
+      }, 100);
+      return () => clearInterval(interval);
+    }
+  }, []);
+
+  // Initialize Map and handle marker placement/dragging
+  useEffect(() => {
+    if (!mapLoaded || !mapContainerRef.current || mapRef.current) return;
+
+    const L = (window as unknown as LeafletWindow).L;
+    if (!L) return;
+
+    // Centered on San Francisco (latitude: 37.7749, longitude: -122.4194)
+    const sfCoords = [37.7749, -122.4194];
+
+    const map = L.map(mapContainerRef.current, {
+      center: sfCoords,
+      zoom: 13,
+      zoomControl: true,
+    });
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    }).addTo(map);
+
+    // Custom marker icon using inline SVG and Tailwind styles to match the brand color
+    const customIcon = L.divIcon({
+      html: `
+        <div class="relative flex items-center justify-center">
+          <div class="absolute w-8 h-8 bg-primary/30 rounded-full animate-ping"></div>
+          <div class="relative w-6 h-6 bg-primary border-2 border-white rounded-full flex items-center justify-center shadow-md">
+            <div class="w-2 h-2 bg-white rounded-full"></div>
+          </div>
+        </div>
+      `,
+      className: "",
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+
+    const marker = L.marker(sfCoords, {
+      icon: customIcon,
+      draggable: true,
+    }).addTo(map);
+
+    mapRef.current = map;
+    markerRef.current = marker;
+
+    const handleLocationChange = async (lat: number, lng: number) => {
+      try {
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          const addressData = (data as { address?: { road?: string; house_number?: string } }).address;
+          const road = addressData?.road || "";
+          const houseNumber = addressData?.house_number || "";
+          const streetAddress = houseNumber ? `${houseNumber} ${road}` : road;
+          if (streetAddress) {
+            updateAddress("line1", streetAddress);
+          }
+        }
+      } catch (err) {
+        console.error("Geocoding failed:", err);
+      }
+    };
+
+    map.on("click", (e: { latlng: { lat: number; lng: number } }) => {
+      const { lat, lng } = e.latlng;
+      marker.setLatLng([lat, lng]);
+      handleLocationChange(lat, lng);
+    });
+
+    marker.on("dragend", () => {
+      const position = marker.getLatLng();
+      handleLocationChange(position.lat, position.lng);
+    });
+
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [mapLoaded]);
 
   if (submitted) {
     return (
@@ -288,65 +365,52 @@ export function OrderForm() {
               Order Details
             </h3>
 
-            {/* Pickup / Delivery */}
-            <div className="flex flex-col gap-2">
-              <Label className="text-sm font-medium text-foreground">
-                How would you like to receive your order?
-              </Label>
-              <RadioGroup
-                value={form.pickupOrDelivery}
-                onValueChange={(value: "pickup" | "delivery") =>
-                  update("pickupOrDelivery", value)
-                }
-                className="grid grid-cols-2 gap-3"
-              >
-                <Label
-                  htmlFor="pickup"
-                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:[&_svg]:text-primary"
-                >
-                  <RadioGroupItem
-                    value="pickup"
-                    id="pickup"
-                    className="sr-only"
-                  />
-                  <Store className="size-6 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">
-                    Pickup
-                  </span>
-                </Label>
-                <Label
-                  htmlFor="delivery"
-                  className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-input bg-background px-4 py-5 text-center transition-colors has-checked:border-primary has-checked:bg-primary/10 has-checked:[&_svg]:text-primary"
-                >
-                  <RadioGroupItem
-                    value="delivery"
-                    id="delivery"
-                    className="sr-only"
-                  />
-                  <Truck className="size-6 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">
-                    Delivery
-                  </span>
-                </Label>
-              </RadioGroup>
+            {/* Delivery Alert / Badge */}
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex gap-3.5 items-start">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <Truck className="size-5" />
+              </div>
+              <div className="flex-1 min-w-0 font-sans">
+                <p className="text-sm font-semibold text-foreground">
+                  Hand-Delivered in San Francisco
+                </p>
+                <p className="mt-1 text-xs text-secondary-foreground leading-relaxed">
+                  We offer delivery exclusively within the city of San Francisco, California.
+                  Your artisan cookies will arrive fresh and direct to your door.
+                </p>
+              </div>
             </div>
 
-            {form.pickupOrDelivery === "delivery" && (
-              <fieldset className="flex flex-col gap-4">
-                <legend className="text-sm font-medium text-foreground">
-                  Delivery address <span className="text-primary">*</span>
-                </legend>
-                <div className="flex flex-col gap-2">
-                  <Label htmlFor="addressLine1">Street address</Label>
-                  <Input
-                    id="addressLine1"
-                    value={form.address.line1}
-                    onChange={(e) => updateAddress("line1", e.target.value)}
-                    required
-                    placeholder="123 Main St"
-                    autoComplete="address-line1"
-                  />
-                </div>
+            <fieldset className="flex flex-col gap-4">
+              <legend className="text-sm font-medium text-foreground">
+                Delivery Address <span className="text-primary">*</span>
+              </legend>
+
+              <div className="flex flex-col gap-2">
+                <Label className="text-sm font-medium text-foreground flex items-center gap-1.5">
+                  <MapPin className="size-4 text-primary" /> Pin your delivery location
+                </Label>
+                <div
+                  ref={mapContainerRef}
+                  className="h-64 w-full rounded-xl border border-input overflow-hidden shadow-inner z-0"
+                />
+                <span className="text-xs text-muted-foreground leading-relaxed">
+                  Drag the pin or click on the map to automatically fill your street address.
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="addressLine1">Street address</Label>
+                <Input
+                  id="addressLine1"
+                  value={form.address.line1}
+                  onChange={(e) => updateAddress("line1", e.target.value)}
+                  required
+                  placeholder="123 Main St"
+                  autoComplete="address-line1"
+                />
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
                 <div className="flex flex-col gap-2">
                   <Label htmlFor="addressLine2">
                     Apt, suite, unit{" "}
@@ -360,99 +424,29 @@ export function OrderForm() {
                     autoComplete="address-line2"
                   />
                 </div>
-                <div className="flex flex-wrap gap-4">
-                  <div className="w-32.5 shrink-0">
-                    <Label htmlFor="addressState">State</Label>
-                    <Select
-                      value={form.address.state}
-                      onValueChange={(value) => updateAddress("state", value)}
-                    >
-                      <SelectTrigger id="addressState" className="px-2">
-                        <SelectValue placeholder="State" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {US_STATES.map((s) => (
-                          <SelectItem key={s.value} value={s.value}>
-                            <span className="font-medium">{s.label}</span>
-                            <span className="ml-1.5 text-muted-foreground">
-                              ({s.value})
-                            </span>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="min-w-0 flex-1 basis-40">
-                    <Label
-                      htmlFor="addressCity"
-                      className={cn(
-                        !form.address.state && "text-muted-foreground",
-                      )}
-                    >
-                      City
-                    </Label>
-                    {form.address.state ? (
-                      <Combobox
-                        items={cityOptions}
-                        value={form.address.city || null}
-                        onValueChange={(city: string | null) =>
-                          updateAddress("city", city ?? "")
-                        }
-                        disabled={citiesLoading}
-                      >
-                        <ComboboxInput
-                          id="addressCity"
-                          placeholder={
-                            citiesLoading ? "Loading..." : "Search cities..."
-                          }
-                          disabled={citiesLoading}
-                          showClear
-                        />
-                        <ComboboxContent>
-                          <ComboboxEmpty>No cities found.</ComboboxEmpty>
-                          <ComboboxList>
-                            {(cityName: string) => {
-                              const cityInfo = cityByName.get(cityName);
-
-                              return (
-                                <ComboboxItem key={cityName} value={cityName}>
-                                  {cityName}
-                                  {cityInfo?.county && (
-                                    <span className="ml-1.5 text-muted-foreground">
-                                      ({cityInfo.county})
-                                    </span>
-                                  )}
-                                </ComboboxItem>
-                              );
-                            }}
-                          </ComboboxList>
-                        </ComboboxContent>
-                      </Combobox>
-                    ) : (
-                      <Input
-                        id="addressCity"
-                        placeholder={
-                          citiesError ? "Failed to load" : "Select state first"
-                        }
-                        disabled
-                      />
-                    )}
-                  </div>
-                  <div className="w-30 shrink-0">
-                    <Label htmlFor="addressZip">ZIP</Label>
-                    <Input
-                      id="addressZip"
-                      value={form.address.zip}
-                      onChange={(e) => updateAddress("zip", e.target.value)}
-                      required
-                      placeholder="94102"
-                      maxLength={10}
-                      autoComplete="postal-code"
-                    />
-                  </div>
+                <div className="flex flex-col gap-2">
+                  <Label>City & State</Label>
+                  <Input
+                    value="San Francisco, CA"
+                    disabled
+                    className="bg-muted text-muted-foreground cursor-not-allowed font-medium"
+                  />
                 </div>
-              </fieldset>
-            )}
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="addressReference">
+                  Delivery instructions / Landmarks{" "}
+                  <span className="text-muted-foreground">(optional)</span>
+                </Label>
+                <Input
+                  id="addressReference"
+                  value={form.addressReference || ""}
+                  onChange={(e) => update("addressReference", e.target.value)}
+                  placeholder="e.g., ring bell #4, blue gate, drop at front desk"
+                />
+              </div>
+            </fieldset>
 
             {/* Cookie selection with per-product quantity */}
             <div className="flex flex-col gap-2">
@@ -568,29 +562,38 @@ export function OrderForm() {
         <Card>
           <CardContent className="flex flex-col gap-5 p-6 sm:p-8">
             <h3 className="font-serif text-lg font-bold text-foreground">
-              Preferred Date &amp; Time
+              Preferred Delivery Date &amp; Time
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="date">Date</Label>
+                <Label htmlFor="date">
+                  Delivery date <span className="text-primary">*</span>
+                </Label>
                 <Input
                   id="date"
                   type="date"
                   value={form.preferredDate}
                   onChange={(e) => update("preferredDate", e.target.value)}
                   min={today()}
+                  required
                 />
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="time">Time</Label>
+                <Label htmlFor="time">
+                  Delivery time <span className="text-primary">*</span>
+                </Label>
                 <Input
                   id="time"
                   type="time"
                   value={form.preferredTime}
                   onChange={(e) => update("preferredTime", e.target.value)}
+                  required
                 />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+              Please specify when you would like to receive your cookies. We deliver within San Francisco between 9:00 AM and 6:00 PM.
+            </p>
           </CardContent>
         </Card>
       </RevealOnScroll>
@@ -657,7 +660,7 @@ export function OrderForm() {
       <div className="flex flex-col gap-4 text-center">
         <p className="text-sm leading-relaxed text-muted-foreground">
           Orders are manually confirmed before preparation. We&rsquo;ll reach
-          out via email or phone to confirm your pickup or delivery time.
+          out via email or phone to confirm your delivery details and time.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <Button type="submit" size="lg">

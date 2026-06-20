@@ -8,7 +8,7 @@ import { SITE_URL } from '@/lib/constants';
 export const metadata: Metadata = {
   title: 'Order',
   description:
-    'Place an order for freshly baked artisan cookies in San Francisco. Pickup and delivery available.',
+    'Place an order for freshly baked artisan cookies in San Francisco. Local delivery available.',
   openGraph: {
     title: 'Order — Golden Crumb',
     description:

@@ -8,33 +8,32 @@ export function PickupDelivery() {
     <section className="py-14 sm:py-20 lg:py-24">
       <Container>
         <SectionHeader
-          title="Pickup &amp; Delivery"
+          title="Local Delivery"
           subtitle="How to get your cookies fresh and fast."
         />
         <div className="grid gap-8 sm:grid-cols-2">
           <Card>
             <CardContent className="p-6 sm:p-8">
               <h3 className="font-serif text-lg font-bold text-foreground">
-                Pickup
+                Delivery Area
               </h3>
-              <p className="mt-3 text-sm text-secondary-foreground">
-                Order ahead and pick up your cookies fresh from our kitchen in
-                San Francisco. We&rsquo;ll confirm your pickup time after you order.
+              <p className="mt-3 text-sm text-secondary-foreground leading-relaxed">
+                We offer delivery exclusively within the city of San Francisco, CA.
+                All cookies are carefully packaged to ensure they arrive at your door in perfect condition.
               </p>
               <p className="mt-3 text-sm text-secondary-foreground">
-                <span className="font-semibold text-foreground">Location:</span>{' '}
-                {CONTACT.location}
+                <span className="font-semibold text-foreground">Service Zone:</span>{' '}
+                San Francisco, CA
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-6 sm:p-8">
               <h3 className="font-serif text-lg font-bold text-foreground">
-                Delivery
+                Delivery Timing
               </h3>
-              <p className="mt-3 text-sm text-secondary-foreground">
-                We offer delivery within San Francisco. Availability may vary
-                by location and date. Minimum order may apply.
+              <p className="mt-3 text-sm text-secondary-foreground leading-relaxed">
+                Availability may vary by location and date. We manually confirm every order&rsquo;s details and scheduling to coordinate the best delivery window for you.
               </p>
               <p className="mt-3 text-sm text-secondary-foreground">
                 Have questions?{' '}

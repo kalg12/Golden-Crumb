@@ -16,7 +16,7 @@ export function AboutSection() {
               Where is Golden Crumb located?
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-secondary-foreground">
-              Golden Crumb is based in San Francisco, CA. We offer local pickup and
+              Golden Crumb is based in San Francisco, CA. We offer fresh local
               delivery throughout the city.
             </p>
           </article>

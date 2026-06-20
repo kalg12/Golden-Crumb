@@ -14,7 +14,7 @@ import { SOCIAL, CONTACT, SITE_URL } from '@/lib/constants';
 export const metadata: Metadata = {
   title: 'FAQ',
   description:
-    'Frequently asked questions about Golden Crumb artisan cookies in San Francisco. Learn how to order, pickup, delivery, allergens, and more.',
+    'Frequently asked questions about Golden Crumb artisan cookies in San Francisco. Learn how to order, delivery, allergens, and more.',
   openGraph: {
     title: 'FAQ — Golden Crumb',
     description:
@@ -27,7 +27,7 @@ const faqs = [
   {
     question: 'Where is Golden Crumb located?',
     answer:
-      'Golden Crumb is based in San Francisco, CA. We offer local pickup and delivery throughout the city.',
+      'Golden Crumb is based in San Francisco, CA. We offer fresh local delivery throughout the city.',
   },
   {
     question: 'How do I place an order?',
@@ -40,9 +40,9 @@ const faqs = [
       'Yes! We cater events, parties, and corporate gatherings. Our cookies make thoughtful gifts for any occasion. Contact us with your needs and we&rsquo;ll create a custom order.',
   },
   {
-    question: 'Do you offer pickup or delivery?',
+    question: 'Do you offer delivery?',
     answer:
-      'Both! You can choose pickup or delivery when placing your order. Delivery is available within San Francisco and may vary by location and date.',
+      'Yes! We offer local delivery within San Francisco. Delivery availability may vary by location and date, and we will confirm scheduling and details manually after you submit your request.',
   },
   {
     question: 'How fresh are the cookies?',
@@ -62,7 +62,7 @@ const faqs = [
   {
     question: 'What payment methods do you accept?',
     answer:
-      'Payment is handled at pickup or delivery. We accept cash, card, and digital payments. For large orders, we may request a deposit.',
+      'Payment is handled at delivery. We accept cash, card, and digital payments. For large orders, we may request a deposit.',
   },
   {
     question: 'Do your cookies contain allergens?',
@@ -82,7 +82,7 @@ const faqs = [
   {
     question: 'What is your cancellation and refund policy?',
     answer:
-      'You can cancel or modify your order up to 24 hours before your scheduled pickup or delivery. Contact us directly for cancellations. Refunds are handled on a case-by-case basis.',
+      'You can cancel or modify your order up to 24 hours before your scheduled delivery. Contact us directly for cancellations. Refunds are handled on a case-by-case basis.',
   },
 ];
 
