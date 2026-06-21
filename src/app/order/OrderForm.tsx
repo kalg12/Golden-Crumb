@@ -387,7 +387,7 @@ export function OrderForm() {
               markerRef.current.setLatLng([lat, lng]);
             }
             if (mapRef.current) {
-              mapRef.current.setView([lat, lng], 15);
+              mapRef.current.setView([lat, lng], 18);
             }
           }
         }
