@@ -608,7 +608,7 @@ export function OrderForm() {
 
       {/* Card 3 — Date & Time */}
       <RevealOnScroll delay={200}>
-        <Card>
+        <Card className="overflow-visible">
           <CardContent className="flex flex-col gap-5 p-6 sm:p-8">
             <h3 className="font-serif text-lg font-bold text-foreground">
               Preferred Delivery Date &amp; Time
