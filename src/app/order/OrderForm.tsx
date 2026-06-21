@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, Check, MapPin, Minus, Plus, Truck } from "lucide-react";
+import { AlertTriangle, CalendarIcon, Check, MapPin, Minus, Plus, Truck } from "lucide-react";
+import { format, parseISO } from "date-fns";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,6 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RevealOnScroll } from "@/components/shared/RevealOnScroll";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SOCIAL } from "@/lib/constants";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
@@ -88,14 +98,44 @@ const initialForm: FormData = {
   allergyConfirmed: false,
 };
 
-const today = () => {
-  const d = new Date();
-  return d.toISOString().split("T")[0];
+const TIME_SLOTS = [
+  { value: "09:00", label: "09:00 AM" },
+  { value: "09:30", label: "09:30 AM" },
+  { value: "10:00", label: "10:00 AM" },
+  { value: "10:30", label: "10:30 AM" },
+  { value: "11:00", label: "11:00 AM" },
+  { value: "11:30", label: "11:30 AM" },
+  { value: "12:00", label: "12:00 PM" },
+  { value: "12:30", label: "12:30 PM" },
+  { value: "13:00", label: "01:00 PM" },
+  { value: "13:30", label: "01:30 PM" },
+  { value: "14:00", label: "02:00 PM" },
+  { value: "14:30", label: "02:30 PM" },
+  { value: "15:00", label: "03:00 PM" },
+  { value: "15:30", label: "03:30 PM" },
+  { value: "16:00", label: "04:00 PM" },
+  { value: "16:30", label: "04:30 PM" },
+  { value: "17:00", label: "05:00 PM" },
+  { value: "17:30", label: "05:30 PM" },
+  { value: "18:00", label: "06:00 PM" },
+];
+
+const isWeekend = (date: Date) => {
+  const day = date.getDay();
+  return day === 0 || day === 6; // Sunday or Saturday
+};
+
+const disableDate = (date: Date) => {
+  const todayDate = new Date();
+  todayDate.setHours(0, 0, 0, 0);
+  if (date < todayDate) return true;
+  return !isWeekend(date);
 };
 
 export function OrderForm() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -117,6 +157,15 @@ export function OrderForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.preferredDate) {
+      setValidationError("Please select a preferred delivery date.");
+      return;
+    }
+    if (!form.preferredTime) {
+      setValidationError("Please select a preferred delivery time.");
+      return;
+    }
+    setValidationError(null);
     setSubmitted(true);
   };
 
@@ -566,33 +615,70 @@ export function OrderForm() {
             </h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="date">
+                <Label>
                   Delivery date <span className="text-primary">*</span>
                 </Label>
-                <Input
-                  id="date"
-                  type="date"
-                  value={form.preferredDate}
-                  onChange={(e) => update("preferredDate", e.target.value)}
-                  min={today()}
-                  required
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal px-3 py-2 h-10 border border-input rounded-md bg-background text-sm",
+                        !form.preferredDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                      {form.preferredDate ? (
+                        format(parseISO(form.preferredDate), "PPP")
+                      ) : (
+                        <span>Select delivery date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.preferredDate ? parseISO(form.preferredDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const yyyy = date.getFullYear();
+                          const mm = String(date.getMonth() + 1).padStart(2, "0");
+                          const dd = String(date.getDate()).padStart(2, "0");
+                          update("preferredDate", `${yyyy}-${mm}-${dd}`);
+                          if (validationError) setValidationError(null);
+                        }
+                      }}
+                      disabled={disableDate}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="time">
                   Delivery time <span className="text-primary">*</span>
                 </Label>
-                <Input
-                  id="time"
-                  type="time"
+                <Select
                   value={form.preferredTime}
-                  onChange={(e) => update("preferredTime", e.target.value)}
-                  required
-                />
+                  onValueChange={(value) => {
+                    update("preferredTime", value);
+                    if (validationError) setValidationError(null);
+                  }}
+                >
+                  <SelectTrigger id="time" className="w-full">
+                    <SelectValue placeholder="Select delivery time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_SLOTS.map((slot) => (
+                      <SelectItem key={slot.value} value={slot.value}>
+                        {slot.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-              Please specify when you would like to receive your cookies. We deliver within San Francisco between 9:00 AM and 6:00 PM.
+              Please specify when you would like to receive your cookies. We deliver within San Francisco on weekends (Saturday &amp; Sunday) between 9:00 AM and 6:00 PM.
             </p>
           </CardContent>
         </Card>
@@ -658,6 +744,12 @@ export function OrderForm() {
 
       {/* Submit */}
       <div className="flex flex-col gap-4 text-center">
+        {validationError && (
+          <div className="mx-auto max-w-md rounded-xl border border-destructive/20 bg-destructive/5 p-4 flex gap-3 items-center justify-center text-left">
+            <AlertTriangle className="size-5 text-destructive shrink-0" />
+            <p className="text-sm font-medium text-destructive">{validationError}</p>
+          </div>
+        )}
         <p className="text-sm leading-relaxed text-muted-foreground">
           Orders are manually confirmed before preparation. We&rsquo;ll reach
           out via email or phone to confirm your delivery details and time.
