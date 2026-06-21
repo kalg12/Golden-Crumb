@@ -23,6 +23,7 @@ import { SOCIAL } from "@/lib/constants";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { createOrderAction } from "@/app/actions/dbActions";
+import { getCurrentSession } from "@/app/actions/authActions";
 
 interface LeafletIcon {
   _leaflet_id?: number;
@@ -143,6 +144,24 @@ export function OrderForm() {
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isUserTyping, setIsUserTyping] = useState(false);
+  const [session, setSession] = useState<{ name?: string; email?: string; phone?: string } | null>(null);
+  const [createAccount, setCreateAccount] = useState(false);
+  const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    async function checkSession() {
+      const res = await getCurrentSession();
+      if (res.isLoggedIn) {
+        setSession({ name: res.name, email: res.email });
+        setForm((prev) => ({
+          ...prev,
+          name: res.name || prev.name,
+          email: res.email || prev.email,
+        }));
+      }
+    }
+    checkSession();
+  }, []);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -184,6 +203,11 @@ export function OrderForm() {
       return;
     }
 
+    if (!session && createAccount && !password.trim()) {
+      setValidationError("Please specify a password to register your account.");
+      return;
+    }
+
     setValidationError(null);
 
     try {
@@ -199,6 +223,7 @@ export function OrderForm() {
         notes: form.notes,
         lat: form.lat,
         lng: form.lng,
+        password: (!session && createAccount && password.trim()) ? password : undefined,
       });
 
       if (res.success) {
@@ -456,6 +481,8 @@ export function OrderForm() {
                 value={form.name}
                 onChange={(e) => update("name", e.target.value)}
                 required
+                disabled={!!session}
+                className={cn(session && "bg-muted text-muted-foreground cursor-not-allowed")}
                 placeholder="Your name"
               />
             </div>
@@ -483,10 +510,69 @@ export function OrderForm() {
                   value={form.email}
                   onChange={(e) => update("email", e.target.value)}
                   required
+                  disabled={!!session}
+                  className={cn(session && "bg-muted text-muted-foreground cursor-not-allowed")}
                   placeholder="hello@example.com"
                 />
               </div>
             </div>
+
+            {session ? (
+              <div className="rounded-xl border border-green-500/20 bg-green-500/5 p-4 flex gap-3 items-center">
+                <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0"></div>
+                <p className="text-xs text-green-700 dark:text-green-300 font-medium">
+                  Logged in as <strong className="text-inherit">{session.name}</strong> ({session.email}). We&rsquo;ll automatically associate this order with your profile.
+                </p>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-4 mt-2 pt-4 border-t border-[#D49A55]/25">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    role="checkbox"
+                    aria-checked={createAccount}
+                    onClick={() => setCreateAccount(!createAccount)}
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
+                      createAccount
+                        ? "border-primary bg-primary text-white"
+                        : "border-[#D49A55]/30 bg-background"
+                    )}
+                  >
+                    {createAccount && <Check className="size-3.5" />}
+                  </button>
+                  <span className="text-sm font-medium text-foreground">
+                    Create an account to track your orders? <span className="text-xs text-muted-foreground font-normal">(Optional)</span>
+                  </span>
+                </div>
+
+                {createAccount && (
+                  <div className="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2 duration-200">
+                    <Label htmlFor="signup-password">
+                      Create Password <span className="text-primary">*</span>
+                    </Label>
+                    <Input
+                      id="signup-password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      placeholder="Minimum 6 characters"
+                    />
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  Already have an account?{" "}
+                  <a
+                    href="/login?redirect=/order"
+                    className="font-semibold text-primary hover:underline"
+                  >
+                    Log in here
+                  </a>
+                </p>
+              </div>
+            )}
           </CardContent>
         </Card>
       </RevealOnScroll>

@@ -57,6 +57,14 @@ export function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link
+                  href="/login"
+                  className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                >
+                  Track Order / Login
+                </Link>
+              </li>
             </ul>
           </div>
 

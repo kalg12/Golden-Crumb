@@ -2,6 +2,8 @@
 
 import { Types } from 'mongoose';
 import { connectToDatabase } from '@/lib/db';
+import { hashPassword } from '@/lib/crypto';
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from '@/lib/email';
 import { Customer, ICustomer } from '@/models/Customer';
 import { Order, IOrder } from '@/models/Order';
 import { products } from '@/data/products';
@@ -28,6 +30,7 @@ interface CreateOrderInput {
   notes?: string;
   lat?: number;
   lng?: number;
+  password?: string;
 }
 
 /**
@@ -82,6 +85,7 @@ export async function createOrderAction(input: CreateOrderInput) {
       notes,
       lat = BAKERY_LAT,
       lng = BAKERY_LNG,
+      password,
     } = input;
 
     // 1. Calculate price and parse items
@@ -128,12 +132,17 @@ export async function createOrderAction(input: CreateOrderInput) {
       customer.name = name;
       customer.phone = phone;
       customer.email = email;
+      if (password) {
+        customer.password = await hashPassword(password);
+      }
     } else {
       // Create a new Customer profile
+      const passwordHash = password ? await hashPassword(password) : undefined;
       customer = new Customer({
         name,
         phone,
         email,
+        password: passwordHash,
         totalSpent: 0,
         orderCount: 0,
         orders: [],
@@ -167,6 +176,22 @@ export async function createOrderAction(input: CreateOrderInput) {
     customer.totalSpent += totalPrice;
     await customer.save();
 
+    // 5. Send order confirmation email
+    try {
+      await sendOrderConfirmationEmail({
+        _id: savedOrder._id.toString(),
+        customerName: savedOrder.customerName,
+        customerEmail: savedOrder.customerEmail,
+        items: savedOrder.items,
+        totalPrice: savedOrder.totalPrice,
+        preferredDate: savedOrder.preferredDate,
+        preferredTime: savedOrder.preferredTime,
+        address: { line1: savedOrder.address.line1 },
+      });
+    } catch (emailErr) {
+      console.error('Failed to send confirmation email:', emailErr);
+    }
+
     return {
       success: true,
       orderId: savedOrder._id.toString(),
@@ -197,6 +222,20 @@ export async function startPreparation(orderId: string) {
     order.prepCompletedAt = undefined;
     order.prepDuration = undefined;
     await order.save();
+
+    // Send status update email
+    try {
+      await sendOrderStatusUpdateEmail({
+        _id: order._id.toString(),
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        status: order.status,
+        preferredDate: order.preferredDate,
+        preferredTime: order.preferredTime,
+      });
+    } catch (emailErr) {
+      console.error('Failed to send status update email:', emailErr);
+    }
 
     return { success: true };
   } catch (error: unknown) {
@@ -229,6 +268,20 @@ export async function completePreparation(orderId: string) {
 
     await order.save();
 
+    // Send status update email
+    try {
+      await sendOrderStatusUpdateEmail({
+        _id: order._id.toString(),
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        status: order.status,
+        preferredDate: order.preferredDate,
+        preferredTime: order.preferredTime,
+      });
+    } catch (emailErr) {
+      console.error('Failed to send status update email:', emailErr);
+    }
+
     return { success: true };
   } catch (error: unknown) {
     console.error('Failed to complete preparation:', error);
@@ -250,6 +303,20 @@ export async function updateOrderStatus(orderId: string, status: string) {
 
     order.status = status;
     await order.save();
+
+    // Send status update email
+    try {
+      await sendOrderStatusUpdateEmail({
+        _id: order._id.toString(),
+        customerName: order.customerName,
+        customerEmail: order.customerEmail,
+        status: order.status,
+        preferredDate: order.preferredDate,
+        preferredTime: order.preferredTime,
+      });
+    } catch (emailErr) {
+      console.error('Failed to send status update email:', emailErr);
+    }
 
     return { success: true };
   } catch (error: unknown) {
