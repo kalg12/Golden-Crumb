@@ -230,6 +230,11 @@ export function AdminDashboard({
   const [history, setHistory] = useState<SalesHistoryItem[]>(salesHistory);
   const [route, setRoute] = useState<RouteStop[]>(initialRoute);
 
+  // Calculate active kitchen prep orders count for switcher badge notification
+  const kitchenPrepCount = useMemo(() => {
+    return orders.filter((o) => o.status === 'kitchen_prep').length;
+  }, [orders]);
+
   // Selected customer for CRM details pane
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
@@ -385,13 +390,29 @@ export function AdminDashboard({
               <button
                 onClick={() => handleTabChange('kitchen')}
                 className={cn(
-                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm relative overflow-visible',
                   activeRole === 'kitchen'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
                     : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <Clock className="size-4" /> Kitchen Screen (KDS)
+                {kitchenPrepCount > 0 && (
+                  <span className="relative flex items-center justify-center ml-1">
+                    <span className={cn(
+                      "animate-ping absolute inline-flex h-3.5 w-3.5 rounded-full opacity-75",
+                      activeRole === 'kitchen' ? "bg-[#FFF7EC]" : "bg-[#D49A55]"
+                    )}></span>
+                    <span className={cn(
+                      "relative inline-flex items-center justify-center h-4.5 min-w-4.5 px-1.5 rounded-full text-[9px] font-extrabold shadow-sm border transition-all duration-300 animate-pulse",
+                      activeRole === 'kitchen'
+                        ? "bg-[#FFF7EC] text-[#D49A55] border-[#FFF7EC]/20"
+                        : "bg-[#D49A55] text-[#FFF7EC] border-[#D49A55]/20"
+                    )}>
+                      {kitchenPrepCount}
+                    </span>
+                  </span>
+                )}
               </button>
               <button
                 onClick={() => handleTabChange('courier')}
@@ -1051,127 +1072,268 @@ interface KitchenViewProps {
 }
 
 function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps) {
-  // Filters active kitchen items: pending or kitchen_prep status
-  const kitchenOrders = useMemo(() => {
+  // Group orders by their active kitchen stages
+  const pendingOrders = useMemo(() => {
     return orders
-      .filter((o) => ['pending', 'kitchen_prep'].includes(o.status))
-      .sort((a, b) => {
-        // kitchen_prep comes first, then sorted by date
-        if (a.status === 'kitchen_prep' && b.status !== 'kitchen_prep') return -1;
-        if (a.status !== 'kitchen_prep' && b.status === 'kitchen_prep') return 1;
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
+      .filter((o) => o.status === 'pending')
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [orders]);
+
+  const prepOrders = useMemo(() => {
+    return orders
+      .filter((o) => o.status === 'kitchen_prep')
+      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  }, [orders]);
+
+  const readyOrders = useMemo(() => {
+    return orders
+      .filter((o) => o.status === 'ready_for_delivery')
+      .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }, [orders]);
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h3 className="font-serif text-lg font-bold flex items-center gap-2">
-          <Clock className="size-5 text-[#D49A55]" /> Kitchen Display Screen (KDS)
-        </h3>
-        <p className="text-xs text-muted-foreground mt-0.5">
-          Real-time preparation prep cards and timer triggers for baking staff
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h3 className="font-serif text-lg font-bold flex items-center gap-2">
+            <Clock className="size-5 text-[#D49A55]" /> Kitchen Display Screen (KDS)
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Real-time preparation columns, baking timers, and packaging checks.
+          </p>
+        </div>
+
+        {/* Counts overview */}
+        <div className="flex flex-wrap items-center gap-3 text-xs bg-[#FFF7EC] dark:bg-[#5A3019] p-3 rounded-2xl border border-primary/10 shadow-sm font-semibold text-inherit shrink-0">
+          <div className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-amber-400"></span>
+            <span>Queue: {pendingOrders.length}</span>
+          </div>
+          <div className="h-3 w-px bg-primary/10"></div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-amber-600 animate-pulse"></span>
+            <span>Baking: {prepOrders.length}</span>
+          </div>
+          <div className="h-3 w-px bg-primary/10"></div>
+          <div className="flex items-center gap-1.5">
+            <span className="size-2 rounded-full bg-green-500"></span>
+            <span>Ready: {readyOrders.length}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {kitchenOrders.length > 0 ? (
-          kitchenOrders.map((o) => (
-            <div
-              key={o._id}
-              className={cn(
-                'rounded-2xl border p-5 flex flex-col gap-4 shadow-sm transition-all',
-                o.status === 'kitchen_prep'
-                  ? 'bg-[#FFF7EC] border-amber-500/40 dark:bg-[#5A3019] dark:border-amber-500/40'
-                  : 'bg-[#FFF7EC]/70 border-primary/10 dark:bg-[#5A3019]/70 dark:border-primary/10'
-              )}
-            >
-              {/* Card Header: Client Name, time slot & custom timer */}
-              <div className="flex items-start justify-between border-b border-primary/10 pb-3">
-                <div className="min-w-0">
-                  <h4 className="font-bold text-sm truncate">{o.customerName}</h4>
-                  <p className="text-[10px] text-[#D49A55] font-semibold mt-0.5">
-                    Slot: {o.preferredDate} ({o.preferredTime})
-                  </p>
-                </div>
-                <div>
-                  {o.status === 'kitchen_prep' && o.prepStartedAt ? (
-                    <KdsTimer prepStartedAt={o.prepStartedAt} />
-                  ) : (
-                    <span className="text-[10px] font-semibold px-2 py-1 rounded bg-[#F8EBDD] text-muted-foreground dark:bg-[#64371F]">
-                      Pending
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Items checklist */}
-              <div className="flex flex-col gap-2">
-                <span className="text-[10px] font-bold text-muted-foreground tracking-wider uppercase">
-                  Items to Bake:
-                </span>
-                <ul className="flex flex-col gap-1 text-xs">
-                  {o.items.map((it, idx) => (
-                    <li key={idx} className="flex items-center justify-between font-medium">
-                      <span>{it.name}</span>
-                      <span className="font-bold text-sm text-[#D49A55] font-mono">
-                        &times;{it.quantity}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Notes / Landmark Address details */}
-              {(o.notes || o.addressReference) && (
-                <div className="bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 p-3 rounded-xl border border-primary/5 text-[11px] leading-relaxed flex flex-col gap-1">
-                  {o.notes && (
-                    <p>
-                      <span className="font-semibold">Note:</span> {o.notes}
-                    </p>
-                  )}
-                  {o.addressReference && (
-                    <p className="text-muted-foreground text-[10px]">
-                      <span className="font-semibold text-inherit">Drop instructions:</span>{' '}
-                      {o.addressReference}
-                    </p>
-                  )}
-                </div>
-              )}
-
-              {/* Kitchen triggers */}
-              <div className="mt-auto pt-3 border-t border-primary/5 flex items-center justify-between gap-3">
-                {/* Print Label popup trigger */}
-                <button
-                  onClick={() => onPrintLabel(o)}
-                  className="p-2 border border-[#D49A55]/30 hover:bg-[#D49A55]/10 rounded-xl transition-all flex items-center justify-center gap-1.5 text-[10px] font-semibold text-[#D49A55]"
-                >
-                  <Printer className="size-4 shrink-0" />
-                  {o.labelPrinted ? 'Printed' : 'Print label'}
-                </button>
-
-                {o.status === 'pending' ? (
-                  <button
-                    onClick={() => onUpdateStatus(o._id, 'kitchen_prep')}
-                    className="flex-1 py-2 bg-amber-500 hover:bg-amber-600 text-[#FFF7EC] font-bold rounded-xl text-xs shadow-sm transition-all"
-                  >
-                    Start Baking
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => onUpdateStatus(o._id, 'ready_for_delivery')}
-                    className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-[#FFF7EC] font-bold rounded-xl text-xs shadow-sm transition-all"
-                  >
-                    Ready / Completed
-                  </button>
-                )}
-              </div>
-            </div>
-          ))
-        ) : (
-          <div className="col-span-full bg-[#FFF7EC]/50 dark:bg-[#5A3019]/50 border border-dashed border-primary/20 rounded-2xl py-12 text-center text-muted-foreground text-xs">
-            No active kitchen orders. Everything is fully baked!
+      {/* 3-Column Kanban Board Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Column 1: Queue (Pending) */}
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+          <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
+            <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-400"></span> Queued for Baking
+            </h4>
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+              {pendingOrders.length}
+            </span>
           </div>
+
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[600px] pr-1">
+            {pendingOrders.length > 0 ? (
+              pendingOrders.map((o) => (
+                <KitchenOrderCard
+                  key={o._id}
+                  order={o}
+                  onUpdateStatus={onUpdateStatus}
+                  onPrintLabel={onPrintLabel}
+                />
+              ))
+            ) : (
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+                No orders waiting.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Column 2: In Preparation (Baking) */}
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+          <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
+            <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-amber-600 animate-pulse"></span> In Ovens (Baking)
+            </h4>
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+              {prepOrders.length}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[600px] pr-1">
+            {prepOrders.length > 0 ? (
+              prepOrders.map((o) => (
+                <KitchenOrderCard
+                  key={o._id}
+                  order={o}
+                  onUpdateStatus={onUpdateStatus}
+                  onPrintLabel={onPrintLabel}
+                />
+              ))
+            ) : (
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+                Ovens are empty.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Column 3: Ready / Completed */}
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+          <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
+            <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <span className="size-2 rounded-full bg-green-500"></span> Ready / Packaged
+            </h4>
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+              {readyOrders.length}
+            </span>
+          </div>
+
+          <div className="flex flex-col gap-3 overflow-y-auto max-h-[600px] pr-1">
+            {readyOrders.length > 0 ? (
+              readyOrders.map((o) => (
+                <KitchenOrderCard
+                  key={o._id}
+                  order={o}
+                  onUpdateStatus={onUpdateStatus}
+                  onPrintLabel={onPrintLabel}
+                />
+              ))
+            ) : (
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+                No ready orders.
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface KitchenOrderCardProps {
+  order: OrderData;
+  onUpdateStatus: (id: string, s: string) => void;
+  onPrintLabel: (o: OrderData) => void;
+}
+
+function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderCardProps) {
+  const prepDurationText = useMemo(() => {
+    if (order.prepDuration) {
+      const mins = Math.floor(order.prepDuration / 60);
+      const secs = order.prepDuration % 60;
+      return `${mins}m ${secs}s`;
+    }
+    return '';
+  }, [order.prepDuration]);
+
+  return (
+    <div
+      className={cn(
+        'rounded-2xl border p-4 flex flex-col gap-3.5 shadow-sm transition-all bg-[#FFF7EC] dark:bg-[#5A3019]',
+        order.status === 'kitchen_prep'
+          ? 'border-[#D49A55]/40 shadow-inner'
+          : 'border-primary/10'
+      )}
+    >
+      {/* Card Header: Client Name, time slot & custom timer */}
+      <div className="flex items-start justify-between border-b border-primary/5 pb-2.5 text-inherit">
+        <div className="min-w-0">
+          <h4 className="font-bold text-xs truncate">{order.customerName}</h4>
+          <p className="text-[9px] text-[#D49A55] font-semibold mt-0.5">
+            Slot: {order.preferredDate} ({order.preferredTime})
+          </p>
+        </div>
+        <div>
+          {order.status === 'kitchen_prep' && order.prepStartedAt ? (
+            <KdsTimer prepStartedAt={order.prepStartedAt} />
+          ) : order.status === 'ready_for_delivery' && prepDurationText ? (
+            <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-green-500/10 text-green-600 border border-green-500/10">
+              {prepDurationText}
+            </span>
+          ) : (
+            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-[#F8EBDD] text-muted-foreground dark:bg-[#64371F]">
+              Queued
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Items list */}
+      <div className="flex flex-col gap-1.5 text-inherit">
+        <span className="text-[9px] font-bold text-muted-foreground tracking-wider uppercase">
+          Items to Bake:
+        </span>
+        <ul className="flex flex-col gap-1 text-xs">
+          {order.items.map((it, idx) => (
+            <li key={idx} className="flex items-center justify-between font-medium text-[11px]">
+              <span>{it.name}</span>
+              <span className="font-bold text-xs text-[#D49A55] font-mono">
+                &times;{it.quantity}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Notes / Landmark Address details */}
+      {(order.notes || order.addressReference) && (
+        <div className="bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-2.5 rounded-xl border border-primary/5 text-[10px] leading-relaxed flex flex-col gap-1 text-inherit">
+          {order.notes && (
+            <p>
+              <span className="font-semibold text-inherit">Note:</span> {order.notes}
+            </p>
+          )}
+          {order.addressReference && (
+            <p className="text-muted-foreground text-[9px]">
+              <span className="font-semibold text-inherit">Drop instructions:</span>{' '}
+              {order.addressReference}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Kitchen triggers */}
+      <div className="mt-auto pt-2.5 border-t border-primary/5 flex items-center justify-between gap-2.5 text-inherit">
+        {/* Print Label popup trigger */}
+        <button
+          onClick={() => onPrintLabel(order)}
+          className={cn(
+            "px-2 py-1.5 border rounded-xl transition-all flex items-center justify-center gap-1.5 text-[9px] font-semibold shadow-2xs",
+            order.labelPrinted
+              ? "bg-green-500/5 text-green-600 border-green-500/20 hover:bg-green-500/10"
+              : "bg-[#D49A55]/5 text-[#D49A55] border-[#D49A55]/20 hover:bg-[#D49A55]/10 animate-pulse"
+          )}
+          title={order.labelPrinted ? "Label printed" : "Print Label"}
+        >
+          <Printer className="size-3.5 shrink-0" />
+          {order.labelPrinted ? 'Printed' : 'Print Label'}
+        </button>
+
+        {order.status === 'pending' && (
+          <button
+            onClick={() => onUpdateStatus(order._id, 'kitchen_prep')}
+            className="flex-1 py-1.5 bg-amber-500 hover:bg-amber-600 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all"
+          >
+            Start Baking
+          </button>
+        )}
+        {order.status === 'kitchen_prep' && (
+          <button
+            onClick={() => onUpdateStatus(order._id, 'ready_for_delivery')}
+            className="flex-1 py-1.5 bg-green-600 hover:bg-green-700 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all"
+          >
+            Ready / Completed
+          </button>
+        )}
+        {order.status === 'ready_for_delivery' && (
+          <span className="flex-1 py-1.5 bg-green-500/10 text-green-600 border border-green-500/20 font-bold rounded-xl text-[10px] text-center block">
+            Ready
+          </span>
         )}
       </div>
     </div>
