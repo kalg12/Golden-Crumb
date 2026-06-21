@@ -7,8 +7,12 @@ import { User } from '@/models/User';
 
 export const dynamic = 'force-dynamic';
 
-export default async function AdminPage() {
+export default async function AdminPage(props: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
   const session = await getCurrentSession();
+  const resolvedSearchParams = await props.searchParams;
+  const initialTab = resolvedSearchParams.tab || '';
   
   const dashboardResult = await getDashboardData();
   const deliveryResult = await getTodayDeliveries();
@@ -62,6 +66,7 @@ export default async function AdminPage() {
           currentUser={currentUser}
           initialStaffUsers={initialStaffUsers}
           initialEmailSettings={initialEmailSettings}
+          initialTab={initialTab}
         />
       </div>
     </main>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import {
   TrendingUp,
   Users,
@@ -145,6 +145,7 @@ interface AdminDashboardProps {
   };
   initialStaffUsers: StaffUser[];
   initialEmailSettings: any;
+  initialTab?: string;
 }
 
 // Map custom marker icons type declaration for window context
@@ -176,13 +177,51 @@ export function AdminDashboard({
   currentUser,
   initialStaffUsers,
   initialEmailSettings,
+  initialTab,
 }: AdminDashboardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Roles toggler: admin, kitchen, courier, staff, email_settings
-  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings'>(
-    currentUser.role === 'admin' ? 'admin' : currentUser.role
-  );
+  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings'>(() => {
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings'];
+    if (initialTab && validTabs.includes(initialTab)) {
+      if (currentUser.role === 'admin' || initialTab === currentUser.role) {
+        return initialTab as any;
+      }
+    }
+    return currentUser.role === 'admin' ? 'admin' : currentUser.role;
+  });
+
+  // Sync state if URL search param 'tab' changes (e.g. browser back/forward buttons)
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings'];
+    if (tab && validTabs.includes(tab)) {
+      if (currentUser.role === 'admin' || tab === currentUser.role) {
+        setActiveRole(tab as any);
+      }
+    }
+  }, [searchParams, currentUser.role]);
+
+  // Set default tab parameter in URL if it is not present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('tab')) {
+      const defaultTab = currentUser.role === 'admin' ? 'admin' : currentUser.role;
+      params.set('tab', defaultTab);
+      router.replace(`${pathname}?${params.toString()}`);
+    }
+  }, [router, pathname, currentUser.role]);
+
+  // Update tab in state and URL search params
+  const handleTabChange = (tab: 'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings') => {
+    setActiveRole(tab);
+    const params = new URLSearchParams(window.location.search);
+    params.set('tab', tab);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   // Local data states that sync with server actions
   const [stats, setStats] = useState(initialStats);
@@ -333,7 +372,7 @@ export function AdminDashboard({
           {currentUser.role === 'admin' ? (
             <>
               <button
-                onClick={() => setActiveRole('admin')}
+                onClick={() => handleTabChange('admin')}
                 className={cn(
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'admin'
@@ -344,7 +383,7 @@ export function AdminDashboard({
                 <TrendingUp className="size-4" /> Admin Dashboard
               </button>
               <button
-                onClick={() => setActiveRole('kitchen')}
+                onClick={() => handleTabChange('kitchen')}
                 className={cn(
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'kitchen'
@@ -355,7 +394,7 @@ export function AdminDashboard({
                 <Clock className="size-4" /> Kitchen Screen (KDS)
               </button>
               <button
-                onClick={() => setActiveRole('courier')}
+                onClick={() => handleTabChange('courier')}
                 className={cn(
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'courier'
@@ -366,7 +405,7 @@ export function AdminDashboard({
                 <Truck className="size-4" /> Courier Routing
               </button>
               <button
-                onClick={() => setActiveRole('staff')}
+                onClick={() => handleTabChange('staff')}
                 className={cn(
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'staff'
@@ -377,7 +416,7 @@ export function AdminDashboard({
                 <Shield className="size-4" /> Staff & Permissions
               </button>
               <button
-                onClick={() => setActiveRole('email_settings')}
+                onClick={() => handleTabChange('email_settings')}
                 className={cn(
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'email_settings'
