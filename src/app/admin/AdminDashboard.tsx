@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   TrendingUp,
   Users,
@@ -18,6 +19,13 @@ import {
   Mail,
   Navigation,
   X,
+  Shield,
+  UserPlus,
+  Trash2,
+  Pencil,
+  LogOut,
+  AlertTriangle,
+  Check,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -28,6 +36,13 @@ import {
   getDashboardData,
   getTodayDeliveries,
 } from '@/app/actions/dbActions';
+import {
+  logoutAction,
+  getStaffUsersAction,
+  createStaffUserAction,
+  updateStaffUserAction,
+  deleteStaffUserAction,
+} from '@/app/actions/authActions';
 
 interface OrderItem {
   productId: string;
@@ -94,6 +109,14 @@ export interface RouteStop extends OrderData {
   distanceFromLastStop: number;
 }
 
+interface StaffUser {
+  _id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'kitchen' | 'courier';
+  createdAt: string;
+}
+
 interface AdminDashboardProps {
   initialStats: {
     totalRevenue: number;
@@ -106,6 +129,12 @@ interface AdminDashboardProps {
   salesHistory: SalesHistoryItem[];
   initialRoute: RouteStop[];
   bakeryCoords: { lat: number; lng: number };
+  currentUser: {
+    name: string;
+    email: string;
+    role: 'admin' | 'kitchen' | 'courier';
+  };
+  initialStaffUsers: StaffUser[];
 }
 
 // Map custom marker icons type declaration for window context
@@ -134,9 +163,15 @@ export function AdminDashboard({
   salesHistory,
   initialRoute,
   bakeryCoords,
+  currentUser,
+  initialStaffUsers,
 }: AdminDashboardProps) {
-  // Roles toggler: admin, kitchen, courier
-  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier'>('admin');
+  const router = useRouter();
+
+  // Roles toggler: admin, kitchen, courier, staff
+  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff'>(
+    currentUser.role === 'admin' ? 'admin' : currentUser.role
+  );
 
   // Local data states that sync with server actions
   const [stats, setStats] = useState(initialStats);
@@ -158,6 +193,13 @@ export function AdminDashboard({
 
   // Loading flag for backend refreshing
   const [loading, setLoading] = useState(false);
+
+  // Handle logout
+  const handleLogout = async () => {
+    await logoutAction();
+    router.push('/');
+    router.refresh();
+  };
 
   // Function to refresh dashboard data from database
   const refreshData = async () => {
@@ -273,43 +315,70 @@ export function AdminDashboard({
             Golden Crumb · <span className="text-[#D49A55]">HQ Portal</span>
           </h1>
           <p className="text-xs text-[#4A2718]/70 dark:text-[#F7EADD]/70 mt-0.5">
-            Artisan Cookie Bakery Control Center
+            Logged in as <strong className="text-inherit">{currentUser.name}</strong> ({currentUser.role.toUpperCase()})
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => setActiveRole('admin')}
-            className={cn(
-              'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
-              activeRole === 'admin'
-                ? 'bg-[#D49A55] text-[#FFF7EC]'
-                : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
-            )}
-          >
-            <TrendingUp className="size-4" /> Admin Dashboard
-          </button>
-          <button
-            onClick={() => setActiveRole('kitchen')}
-            className={cn(
-              'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
-              activeRole === 'kitchen'
-                ? 'bg-[#D49A55] text-[#FFF7EC]'
-                : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
-            )}
-          >
-            <Clock className="size-4" /> Kitchen Screen (KDS)
-          </button>
-          <button
-            onClick={() => setActiveRole('courier')}
-            className={cn(
-              'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
-              activeRole === 'courier'
-                ? 'bg-[#D49A55] text-[#FFF7EC]'
-                : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
-            )}
-          >
-            <Truck className="size-4" /> Courier routing
-          </button>
+          {currentUser.role === 'admin' ? (
+            <>
+              <button
+                onClick={() => setActiveRole('admin')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'admin'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <TrendingUp className="size-4" /> Admin Dashboard
+              </button>
+              <button
+                onClick={() => setActiveRole('kitchen')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'kitchen'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <Clock className="size-4" /> Kitchen Screen (KDS)
+              </button>
+              <button
+                onClick={() => setActiveRole('courier')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'courier'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <Truck className="size-4" /> Courier Routing
+              </button>
+              <button
+                onClick={() => setActiveRole('staff')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'staff'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <Shield className="size-4" /> Staff & Permissions
+              </button>
+            </>
+          ) : (
+            <div className="px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 text-xs font-bold capitalize flex items-center gap-1.5">
+              {currentUser.role === 'kitchen' ? (
+                <>
+                  <Clock className="size-4 text-[#D49A55]" /> Kitchen Station
+                </>
+              ) : (
+                <>
+                  <Truck className="size-4 text-[#D49A55]" /> Courier Station
+                </>
+              )}
+            </div>
+          )}
           <button
             onClick={refreshData}
             disabled={loading}
@@ -317,6 +386,12 @@ export function AdminDashboard({
             title="Refresh database"
           >
             <RotateCcw className={cn('size-4', loading && 'animate-spin')} />
+          </button>
+          <button
+            onClick={handleLogout}
+            className="px-3 py-2 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 text-red-600 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm"
+          >
+            <LogOut className="size-4" /> Log Out
           </button>
         </div>
       </header>
@@ -357,6 +432,13 @@ export function AdminDashboard({
           route={route}
           bakeryCoords={bakeryCoords}
           onUpdateStatus={handleUpdateStatus}
+        />
+      )}
+
+      {activeRole === 'staff' && currentUser.role === 'admin' && (
+        <StaffManagementView
+          initialUsers={initialStaffUsers}
+          currentUserEmail={currentUser.email}
         />
       )}
 
@@ -1516,6 +1598,420 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
         {/* Leaflet container */}
         <div className="border border-primary/10 rounded-2xl overflow-hidden shadow-inner bg-[#FFF7EC] dark:bg-[#5A3019] relative z-0 h-[480px]">
           <div ref={mapContainerRef} className="h-full w-full" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SUB-COMPONENT: STAFF & PERMISSIONS MANAGEMENT VIEW
+   ========================================================================== */
+
+interface StaffManagementViewProps {
+  initialUsers: StaffUser[];
+  currentUserEmail: string;
+}
+
+function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagementViewProps) {
+  const [users, setUsers] = useState<StaffUser[]>(initialUsers);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Form toggles
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [editingUser, setEditingUser] = useState<StaffUser | null>(null);
+
+  // Input states
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'admin' | 'kitchen' | 'courier'>('kitchen');
+
+  const fetchUsers = async () => {
+    setLoading(true);
+    try {
+      const res = await getStaffUsersAction();
+      if (res.success && res.users) {
+        setUsers(res.users);
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to sync staff list.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const res = await createStaffUserAction(name, email, password, role);
+      if (res.success) {
+        setFeedback({ type: 'success', message: `Staff member ${name} created successfully!` });
+        setName('');
+        setEmail('');
+        setPassword('');
+        setRole('kitchen');
+        setShowAddForm(false);
+        await fetchUsers();
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to create staff member.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditInit = (user: StaffUser) => {
+    setEditingUser(user);
+    setName(user.name);
+    setEmail(user.email);
+    setRole(user.role);
+    setPassword('');
+    setFeedback(null);
+  };
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingUser) return;
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const res = await updateStaffUserAction(
+        editingUser._id,
+        name,
+        email,
+        role,
+        password.trim() ? password : undefined
+      );
+      if (res.success) {
+        setFeedback({ type: 'success', message: `Staff member ${name} updated successfully!` });
+        setEditingUser(null);
+        setName('');
+        setEmail('');
+        setPassword('');
+        await fetchUsers();
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to update staff member.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete ${userName}?`)) return;
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const res = await deleteStaffUserAction(userId);
+      if (res.success) {
+        setFeedback({ type: 'success', message: `Staff member deleted successfully.` });
+        await fetchUsers();
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to delete staff member.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-xl font-bold flex items-center gap-2">
+            <Shield className="size-5 text-[#D49A55]" /> Staff &amp; Permissions Directory
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Manage bakery administrator, kitchen baking staff, and courier accounts.
+          </p>
+        </div>
+        {!showAddForm && !editingUser && (
+          <button
+            onClick={() => {
+              setShowAddForm(true);
+              setName('');
+              setEmail('');
+              setPassword('');
+              setRole('kitchen');
+              setFeedback(null);
+            }}
+            className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] rounded-xl text-xs font-bold shadow-sm transition-all flex items-center gap-1.5 shrink-0"
+          >
+            <UserPlus className="size-4" /> Add Staff Member
+          </button>
+        )}
+      </div>
+
+      {feedback && (
+        <div
+          className={cn(
+            'p-3.5 rounded-xl text-xs flex items-start gap-2.5 leading-relaxed border',
+            feedback.type === 'success'
+              ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+              : 'bg-red-500/10 border-red-500/20 text-red-600'
+          )}
+        >
+          {feedback.type === 'success' ? (
+            <Check className="size-4 shrink-0 mt-0.5" />
+          ) : (
+            <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+          )}
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
+      {/* Forms Section */}
+      {showAddForm && (
+        <form onSubmit={handleCreate} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+          <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Create Staff Account
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="staff-name" className="text-xs font-semibold text-muted-foreground">Full Name</label>
+              <input
+                id="staff-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                placeholder="e.g. John Doe"
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="staff-email" className="text-xs font-semibold text-muted-foreground">Email Address</label>
+              <input
+                id="staff-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="e.g. john@goldencrumb.com"
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="staff-pass" className="text-xs font-semibold text-muted-foreground">Password</label>
+              <input
+                id="staff-pass"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Minimum 6 characters"
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="staff-role" className="text-xs font-semibold text-muted-foreground">System Role &amp; Permissions</label>
+              <select
+                id="staff-role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as 'admin' | 'kitchen' | 'courier')}
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+              >
+                <option value="admin">Admin (Full Control)</option>
+                <option value="kitchen">Kitchen (KDS View Only)</option>
+                <option value="courier">Courier (Routing View Only)</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3.5 mt-2">
+            <button
+              type="button"
+              onClick={() => setShowAddForm(false)}
+              className="px-4 py-2 border border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-inherit text-xs font-semibold rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Create Account'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {editingUser && (
+        <form onSubmit={handleUpdate} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+          <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Edit Staff Account: {editingUser.name}
+          </h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="edit-name" className="text-xs font-semibold text-muted-foreground">Full Name</label>
+              <input
+                id="edit-name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="edit-email" className="text-xs font-semibold text-muted-foreground">Email Address</label>
+              <input
+                id="edit-email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="edit-pass" className="text-xs font-semibold text-muted-foreground flex justify-between">
+                <span>Update Password</span>
+                <span className="text-[10px] text-muted-foreground font-normal italic">(leave blank to keep current)</span>
+              </label>
+              <input
+                id="edit-pass"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="New password (optional)"
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="edit-role" className="text-xs font-semibold text-muted-foreground">System Role &amp; Permissions</label>
+              <select
+                id="edit-role"
+                value={role}
+                onChange={(e) => setRole(e.target.value as 'admin' | 'kitchen' | 'courier')}
+                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+              >
+                <option value="admin">Admin (Full Control)</option>
+                <option value="kitchen">Kitchen (KDS View Only)</option>
+                <option value="courier">Courier (Routing View Only)</option>
+              </select>
+            </div>
+          </div>
+          <div className="flex justify-end gap-3.5 mt-2">
+            <button
+              type="button"
+              onClick={() => setEditingUser(null)}
+              className="px-4 py-2 border border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-inherit text-xs font-semibold rounded-xl transition-all"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : 'Update Details'}
+            </button>
+          </div>
+        </form>
+      )}
+
+      {/* Users Directory Table */}
+      <div className="border border-primary/5 rounded-2xl overflow-hidden shadow-sm bg-[#FFF7EC]/40 dark:bg-[#5A3019]/20">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border-b border-primary/5 font-semibold text-muted-foreground uppercase tracking-wider">
+                <th className="py-3.5 px-4">Full Name</th>
+                <th className="py-3.5 px-4">Email</th>
+                <th className="py-3.5 px-4">System Role</th>
+                <th className="py-3.5 px-4">Registered</th>
+                <th className="py-3.5 px-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-primary/5">
+              {users.map((user) => {
+                const isSelf = user.email.toLowerCase() === currentUserEmail.toLowerCase();
+                return (
+                  <tr key={user._id} className="hover:bg-primary/5 transition-all">
+                    <td className="py-3.5 px-4 font-semibold">
+                      <div className="flex items-center gap-1.5">
+                        <span>{user.name}</span>
+                        {isSelf && (
+                          <span className="text-[9px] bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded font-mono font-bold font-sans">
+                            You
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-4 text-muted-foreground font-mono">{user.email}</td>
+                    <td className="py-3.5 px-4">
+                      {user.role === 'admin' && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 border border-red-500/20 uppercase tracking-tight">
+                          <Shield className="size-3" /> Admin
+                        </span>
+                      )}
+                      {user.role === 'kitchen' && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#D49A55]/10 text-[#D49A55] border border-[#D49A55]/20 uppercase tracking-tight">
+                          <Clock className="size-3" /> Kitchen
+                        </span>
+                      )}
+                      {user.role === 'courier' && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20 uppercase tracking-tight">
+                          <Truck className="size-3" /> Courier
+                        </span>
+                      )}
+                    </td>
+                    <td className="py-3.5 px-4 text-muted-foreground">
+                      {new Date(user.createdAt).toLocaleDateString(undefined, {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </td>
+                    <td className="py-3.5 px-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEditInit(user)}
+                          className="p-1.5 border border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-[#D49A55] rounded-lg transition-all"
+                          title="Edit staff account"
+                        >
+                          <Pencil className="size-3.5" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(user._id, user.name)}
+                          disabled={isSelf}
+                          className={cn(
+                            'p-1.5 border border-red-500/20 text-red-600 rounded-lg transition-all',
+                            isSelf
+                              ? 'opacity-30 cursor-not-allowed'
+                              : 'hover:bg-red-500/10'
+                          )}
+                          title={isSelf ? 'Cannot delete yourself' : 'Delete staff account'}
+                        >
+                          <Trash2 className="size-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

@@ -165,3 +165,177 @@ export async function getCurrentSession(): Promise<{
     return { isLoggedIn: false };
   }
 }
+
+/**
+ * Server Action: Get all staff users (excludes passwords, admin only).
+ */
+export async function getStaffUsersAction(): Promise<{
+  success: boolean;
+  users?: { _id: string; name: string; email: string; role: 'admin' | 'kitchen' | 'courier'; createdAt: string }[];
+  error?: string;
+}> {
+  try {
+    const session = await getCurrentSession();
+    if (!session.isLoggedIn || session.role !== 'admin') {
+      return { success: false, error: 'Unauthorized. Administrator access required.' };
+    }
+
+    await connectToDatabase();
+    const users = await User.find({}).sort({ createdAt: -1 }).lean();
+    
+    const serializedUsers = users.map((u) => ({
+      _id: u._id.toString(),
+      name: u.name,
+      email: u.email,
+      role: u.role as 'admin' | 'kitchen' | 'courier',
+      createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : new Date().toISOString(),
+    }));
+
+    return { success: true, users: serializedUsers };
+  } catch (err) {
+    console.error('getStaffUsersAction error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to query staff users' };
+  }
+}
+
+/**
+ * Server Action: Create a new staff user (admin only).
+ */
+export async function createStaffUserAction(
+  name: string,
+  email: string,
+  password: string,
+  role: 'admin' | 'kitchen' | 'courier'
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getCurrentSession();
+    if (!session.isLoggedIn || session.role !== 'admin') {
+      return { success: false, error: 'Unauthorized. Administrator access required.' };
+    }
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      return { success: false, error: 'Name, email, and password are required.' };
+    }
+
+    await connectToDatabase();
+    const normEmail = email.trim().toLowerCase();
+
+    const existingUser = await User.findOne({ email: normEmail });
+    if (existingUser) {
+      return { success: false, error: 'A staff member with this email already exists.' };
+    }
+
+    const passHash = await hashPassword(password);
+    const newUser = new User({
+      name: name.trim(),
+      email: normEmail,
+      role,
+      password: passHash,
+    });
+
+    await newUser.save();
+    return { success: true };
+  } catch (err) {
+    console.error('createStaffUserAction error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to create staff user' };
+  }
+}
+
+/**
+ * Server Action: Update a staff user (admin only).
+ */
+export async function updateStaffUserAction(
+  userId: string,
+  name: string,
+  email: string,
+  role: 'admin' | 'kitchen' | 'courier',
+  password?: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getCurrentSession();
+    if (!session.isLoggedIn || session.role !== 'admin') {
+      return { success: false, error: 'Unauthorized. Administrator access required.' };
+    }
+
+    if (!userId) {
+      return { success: false, error: 'User ID is required.' };
+    }
+
+    await connectToDatabase();
+    const user = await User.findById(userId);
+    if (!user) {
+      return { success: false, error: 'User not found.' };
+    }
+
+    const normEmail = email.trim().toLowerCase();
+    if (normEmail !== user.email) {
+      const emailTaken = await User.findOne({ email: normEmail });
+      if (emailTaken) {
+        return { success: false, error: 'A staff member with this email already exists.' };
+      }
+    }
+
+    // Prevent changing role of the last admin
+    if (user.role === 'admin' && role !== 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return { success: false, error: 'Cannot demote the last administrator.' };
+      }
+    }
+
+    user.name = name.trim();
+    user.email = normEmail;
+    user.role = role;
+
+    if (password && password.trim()) {
+      user.password = await hashPassword(password);
+    }
+
+    await user.save();
+    return { success: true };
+  } catch (err) {
+    console.error('updateStaffUserAction error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to update staff user' };
+  }
+}
+
+/**
+ * Server Action: Delete a staff user (admin only).
+ */
+export async function deleteStaffUserAction(userId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const session = await getCurrentSession();
+    if (!session.isLoggedIn || session.role !== 'admin') {
+      return { success: false, error: 'Unauthorized. Administrator access required.' };
+    }
+
+    if (!userId) {
+      return { success: false, error: 'User ID is required.' };
+    }
+
+    // Prevent deleting themselves
+    if (session.userId === userId) {
+      return { success: false, error: 'You cannot delete your own administrator account.' };
+    }
+
+    await connectToDatabase();
+    const user = await User.findById(userId);
+    if (!user) {
+      return { success: false, error: 'User not found.' };
+    }
+
+    // Prevent deleting the last admin
+    if (user.role === 'admin') {
+      const adminCount = await User.countDocuments({ role: 'admin' });
+      if (adminCount <= 1) {
+        return { success: false, error: 'You cannot delete the last administrator.' };
+      }
+    }
+
+    await User.findByIdAndDelete(userId);
+    return { success: true };
+  } catch (err) {
+    console.error('deleteStaffUserAction error:', err);
+    return { success: false, error: err instanceof Error ? err.message : 'Failed to delete staff user' };
+  }
+}
