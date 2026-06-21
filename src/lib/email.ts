@@ -1,7 +1,101 @@
 import fs from 'fs/promises';
 import path from 'path';
-
-const RESEND_API_KEY = process.env.RESEND_API_KEY;
+import { EmailSettings } from '@/models/EmailSettings';
+export const DEFAULT_TEMPLATES = {
+  customerConfirmation: {
+    subject: '🍪 Order Confirmation #{{orderId}} - Golden Crumb',
+    body: `<h2>Hello, {{customerName}}!</h2>
+<p>Thank you for baking with us! We have received your order request <strong>#{{orderId}}</strong> and are reviewing details.</p>
+<p>Here is your delivery summary:</p>
+{{itemsTable}}
+<div class="total">Estimated Total: {{totalPrice}}</div>
+<div style="background-color: #F8EBDD; padding: 16px; border-radius: 8px; margin-top: 16px;">
+  <p style="margin: 0 0 8px 0;"><strong>Delivery Slot:</strong> {{preferredDate}} ({{preferredTime}})</p>
+  <p style="margin: 0;"><strong>Address:</strong> {{deliveryAddress}}</p>
+</div>
+<p>You can track the live status of your baking cookies at the link below:</p>
+<div style="text-align: center;">
+  <a href="{{trackingUrl}}" class="button">Track My Order</a>
+</div>`,
+  },
+  adminConfirmation: {
+    subject: '🚨 [ALERT] New Order #{{orderId}} - Golden Crumb',
+    body: `<h2>New Order Request Received!</h2>
+<p>Order <strong>#{{orderId}}</strong> has been registered in the queue.</p>
+<p><strong>Customer:</strong> {{customerName}} ({{customerEmail}})</p>
+{{itemsTable}}
+<div class="total">Total Value: {{totalPrice}}</div>
+<div style="background-color: #F8EBDD; padding: 16px; border-radius: 8px; margin-top: 16px;">
+  <p style="margin: 0 0 8px 0;"><strong>Scheduled Slot:</strong> {{preferredDate}} ({{preferredTime}})</p>
+  <p style="margin: 0;"><strong>Destination:</strong> {{deliveryAddress}}</p>
+</div>
+<div style="text-align: center;">
+  <a href="{{adminUrl}}" class="button">Open HQ Dashboard</a>
+</div>`,
+  },
+  statusKitchenPrep: {
+    subject: '📦 Update on Order #{{orderId}}: BAKING STARTED',
+    body: `<h2>Ovens are pre-heating!</h2>
+<p>Hello, {{customerName}}. We want to share a live update regarding your order request <strong>#{{orderId}}</strong>.</p>
+<div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+  <p style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">Current Status: Baking</p>
+  <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">Your artisan cookies have entered the kitchen prep stage and are now being freshly rolled and baked by our team.</p>
+</div>
+<p>Target delivery window remains: <strong>{{preferredDate}} ({{preferredTime}})</strong>.</p>
+<p>Track live updates on our portal:</p>
+<div style="text-align: center;">
+  <a href="{{trackingUrl}}" class="button">Track My Order</a>
+</div>`,
+  },
+  statusReadyForDelivery: {
+    subject: '📦 Update on Order #{{orderId}}: READY FOR DELIVERY',
+    body: `<h2>Golden and fresh!</h2>
+<p>Hello, {{customerName}}. We want to share a live update regarding your order request <strong>#{{orderId}}</strong>.</p>
+<div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+  <p style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">Current Status: Ready for Delivery</p>
+  <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">Great news! Your cookies have finished baking, cooled down, and are packed. They are waiting for dispatch.</p>
+</div>
+<p>Target delivery window remains: <strong>{{preferredDate}} ({{preferredTime}})</strong>.</p>
+<p>Track live updates on our portal:</p>
+<div style="text-align: center;">
+  <a href="{{trackingUrl}}" class="button">Track My Order</a>
+</div>`,
+  },
+  statusOutForDelivery: {
+    subject: '📦 Update on Order #{{orderId}}: OUT FOR DELIVERY',
+    body: `<h2>Cookies on the move!</h2>
+<p>Hello, {{customerName}}. We want to share a live update regarding your order request <strong>#{{orderId}}</strong>.</p>
+<div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+  <p style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">Current Status: Out for Delivery</p>
+  <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">Your delivery courier has departed the kitchen! Fresh cookies are heading your way in San Francisco right now.</p>
+</div>
+<p>Target delivery window remains: <strong>{{preferredDate}} ({{preferredTime}})</strong>.</p>
+<p>Track live updates on our portal:</p>
+<div style="text-align: center;">
+  <a href="{{trackingUrl}}" class="button">Track My Order</a>
+</div>`,
+  },
+  statusDelivered: {
+    subject: '🍪 Update on Order #{{orderId}}: DELIVERED',
+    body: `<h2>Delivered & Fresh!</h2>
+<p>Hello, {{customerName}}. We want to share a live update regarding your order request <strong>#{{orderId}}</strong>.</p>
+<div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+  <p style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">Current Status: Delivered</p>
+  <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">Cookies have been successfully dropped off at your address. Enjoy your premium treats!</p>
+</div>
+<p>Enjoy your warm cookies!</p>`,
+  },
+  statusCancelled: {
+    subject: '❌ Update on Order #{{orderId}}: CANCELLED',
+    body: `<h2>Order Cancelled</h2>
+<p>Hello, {{customerName}}. We want to share a live update regarding your order request <strong>#{{orderId}}</strong>.</p>
+<div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
+  <p style="margin: 0; font-size: 15px; font-weight: bold; text-transform: uppercase;">Current Status: Cancelled</p>
+  <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">Your order request has been marked as cancelled. If you did not request this, please reach out to our team.</p>
+</div>
+<p>If you have any questions, contact us on WhatsApp.</p>`,
+  },
+};
 
 interface EmailPayload {
   to: string;
@@ -10,32 +104,94 @@ interface EmailPayload {
 }
 
 /**
- * Sends a transactional email. Integrates with Resend if credentials exist,
- * otherwise writes a mock preview file locally to artifacts.
+ * Helper: Parse template placeholders like {{customerName}} to actual values.
+ */
+function replacePlaceholders(template: string, variables: Record<string, string>): string {
+  let result = template;
+  for (const [key, value] of Object.entries(variables)) {
+    result = result.split(`{{${key}}}`).join(value);
+  }
+  return result;
+}
+
+/**
+ * Sends a transactional email. Integrates dynamically with Resend API or SMTP (via nodemailer),
+ * falling back to writing a mock preview file locally if disabled.
  */
 export async function sendEmail({ to, subject, html }: EmailPayload): Promise<boolean> {
-  if (RESEND_API_KEY) {
-    try {
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${RESEND_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          from: 'Golden Crumb <orders@golden-crumb.com>',
+  let settings = null;
+  try {
+    settings = await EmailSettings.findOne({});
+  } catch (err) {
+    console.warn('Could not read email settings from MongoDB:', err);
+  }
+
+  const provider = settings?.provider || (process.env.RESEND_API_KEY ? 'resend' : 'mock');
+  const from = settings?.fromAddress || 'Golden Crumb <orders@golden-crumb.com>';
+
+  if (provider === 'resend') {
+    const apiKey = settings?.resendApiKey || process.env.RESEND_API_KEY;
+    if (apiKey) {
+      try {
+        const res = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            from,
+            to,
+            subject,
+            html,
+          }),
+        });
+        if (res.ok) {
+          return true;
+        }
+        const data = await res.json();
+        console.error('Resend API failed:', data);
+      } catch (err) {
+        console.error('Failed to dispatch Resend email:', err);
+      }
+    } else {
+      console.warn('Resend provider selected but no API Key configured.');
+    }
+  } else if (provider === 'smtp') {
+    if (settings?.smtpHost) {
+      try {
+        let nodemailer;
+        try {
+          nodemailer = require('nodemailer');
+        } catch (e) {
+          console.error('[SMTP ERROR] nodemailer is not installed. Run npm install nodemailer first.');
+          throw new Error('nodemailer is missing');
+        }
+
+        const transporter = nodemailer.createTransport({
+          host: settings.smtpHost,
+          port: settings.smtpPort || 587,
+          secure: settings.smtpSecure || false,
+          auth: {
+            user: settings.smtpUser || '',
+            pass: settings.smtpPass || '',
+          },
+        });
+
+        await transporter.sendMail({
+          from,
           to,
           subject,
           html,
-        }),
-      });
-      if (res.ok) {
+        });
+
+        console.log(`[SMTP EMAIL] Sent successfully to: ${to}`);
         return true;
+      } catch (err) {
+        console.error('Failed to dispatch SMTP email:', err);
       }
-      const data = await res.json();
-      console.error('Resend API failed:', data);
-    } catch (err) {
-      console.error('Failed to dispatch real email:', err);
+    } else {
+      console.warn('SMTP provider selected but no SMTP Host configured.');
     }
   }
 
@@ -183,6 +339,13 @@ export async function sendOrderConfirmationEmail(order: {
   preferredTime: string;
   address: { line1: string };
 }) {
+  let settings = null;
+  try {
+    settings = await EmailSettings.findOne({});
+  } catch (err) {
+    console.warn('Could not read email settings:', err);
+  }
+
   const orderIdShort = order._id.substring(order._id.length - 6);
   const itemsHtml = order.items
     .map(
@@ -195,11 +358,7 @@ export async function sendOrderConfirmationEmail(order: {
     )
     .join('');
 
-  // 1. Send to Customer
-  const customerContent = `
-    <h2>Hello, ${order.customerName}!</h2>
-    <p>Thank you for baking with us! We have received your order request <strong>#${orderIdShort}</strong> and are reviewing details.</p>
-    <p>Here is your delivery summary:</p>
+  const itemsTable = `
     <table class="item-list">
       <thead>
         <tr>
@@ -212,55 +371,44 @@ export async function sendOrderConfirmationEmail(order: {
         ${itemsHtml}
       </tbody>
     </table>
-    <div class="total">Estimated Total: $${order.totalPrice.toFixed(2)}</div>
-    <div style="background-color: #F8EBDD; padding: 16px; border-radius: 8px; margin-top: 16px;">
-      <p style="margin: 0 0 8px 0;"><strong>Delivery Slot:</strong> ${order.preferredDate} (${order.preferredTime})</p>
-      <p style="margin: 0;"><strong>Address:</strong> ${order.address.line1}</p>
-    </div>
-    <p>You can track the live status of your baking cookies at the link below:</p>
-    <div style="text-align: center;">
-      <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders" class="button">Track My Order</a>
-    </div>
   `;
 
-  const customerHtml = getEmailBaseTemplate(`Order Confirmation #${orderIdShort}`, customerContent);
+  const variables = {
+    orderId: orderIdShort,
+    customerName: order.customerName,
+    customerEmail: order.customerEmail,
+    totalPrice: `$${order.totalPrice.toFixed(2)}`,
+    preferredDate: order.preferredDate,
+    preferredTime: order.preferredTime,
+    deliveryAddress: order.address.line1,
+    itemsTable: itemsTable,
+    trackingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders`,
+    adminUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/admin`,
+  };
+
+  // 1. Send to Customer
+  const custTemplate = settings?.templates?.customerConfirmation || DEFAULT_TEMPLATES.customerConfirmation;
+  const custSubject = replacePlaceholders(custTemplate.subject, variables);
+  const custBody = replacePlaceholders(custTemplate.body, variables);
+  const customerHtml = getEmailBaseTemplate(custSubject, custBody);
+
   await sendEmail({
     to: order.customerEmail,
-    subject: `🍪 Order Confirmation #${orderIdShort} - Golden Crumb`,
+    subject: custSubject,
     html: customerHtml,
   });
 
   // 2. Send to Admin
-  const adminContent = `
-    <h2>New Order Request Received!</h2>
-    <p>Order <strong>#${orderIdShort}</strong> has been registered in the queue.</p>
-    <p><strong>Customer:</strong> ${order.customerName} (${order.customerEmail})</p>
-    <table class="item-list">
-      <thead>
-        <tr>
-          <th>Cookie</th>
-          <th style="text-align: center;">Quantity</th>
-          <th style="text-align: right;">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${itemsHtml}
-      </tbody>
-    </table>
-    <div class="total">Total Value: $${order.totalPrice.toFixed(2)}</div>
-    <div style="background-color: #F8EBDD; padding: 16px; border-radius: 8px; margin-top: 16px;">
-      <p style="margin: 0 0 8px 0;"><strong>Scheduled Slot:</strong> ${order.preferredDate} (${order.preferredTime})</p>
-      <p style="margin: 0;"><strong>Destination:</strong> ${order.address.line1}</p>
-    </div>
-    <div style="text-align: center;">
-      <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/admin" class="button">Open HQ Dashboard</a>
-    </div>
-  `;
+  const adminTemplate = settings?.templates?.adminConfirmation || DEFAULT_TEMPLATES.adminConfirmation;
+  const adminSubject = replacePlaceholders(adminTemplate.subject, variables);
+  const adminBody = replacePlaceholders(adminTemplate.body, variables);
+  const adminHtml = getEmailBaseTemplate(adminSubject, adminBody);
 
-  const adminHtml = getEmailBaseTemplate(`New Order Alert #${orderIdShort}`, adminContent);
+  const adminEmailRecipient = settings?.adminAddress || 'admin@golden-crumb.com';
+
   await sendEmail({
-    to: 'admin@golden-crumb.com',
-    subject: `🚨 [ALERT] New Order #${orderIdShort} - Golden Crumb`,
+    to: adminEmailRecipient,
+    subject: adminSubject,
     html: adminHtml,
   });
 }
@@ -276,54 +424,67 @@ export async function sendOrderStatusUpdateEmail(order: {
   preferredDate: string;
   preferredTime: string;
 }) {
+  let settings = null;
+  try {
+    settings = await EmailSettings.findOne({});
+  } catch (err) {
+    console.warn('Could not read email settings:', err);
+  }
+
   const orderIdShort = order._id.substring(order._id.length - 6);
 
   let statusTitle = '';
   let statusDescription = '';
+  let templateConfig = null;
 
   switch (order.status) {
     case 'kitchen_prep':
       statusTitle = 'Ovens are pre-heating!';
       statusDescription = 'Your artisan cookies have entered the kitchen prep stage and are now being freshly rolled and baked by our team.';
+      templateConfig = settings?.templates?.statusKitchenPrep || DEFAULT_TEMPLATES.statusKitchenPrep;
       break;
     case 'ready_for_delivery':
       statusTitle = 'Golden and fresh!';
       statusDescription = 'Great news! Your cookies have finished baking, cooled down, and are packed. They are waiting for dispatch.';
+      templateConfig = settings?.templates?.statusReadyForDelivery || DEFAULT_TEMPLATES.statusReadyForDelivery;
       break;
     case 'out_for_delivery':
       statusTitle = 'Cookies on the move!';
       statusDescription = 'Your delivery courier has departed the kitchen! Fresh cookies are heading your way in San Francisco right now.';
+      templateConfig = settings?.templates?.statusOutForDelivery || DEFAULT_TEMPLATES.statusOutForDelivery;
       break;
     case 'delivered':
       statusTitle = 'Delivered & Fresh!';
       statusDescription = 'Cookies have been successfully dropped off at your address. Enjoy your premium treats!';
+      templateConfig = settings?.templates?.statusDelivered || DEFAULT_TEMPLATES.statusDelivered;
       break;
     case 'cancelled':
       statusTitle = 'Order Cancelled';
       statusDescription = 'Your order request has been marked as cancelled. If you did not request this, please reach out to our team.';
+      templateConfig = settings?.templates?.statusCancelled || DEFAULT_TEMPLATES.statusCancelled;
       break;
     default:
       return;
   }
 
-  const emailContent = `
-    <h2>${statusTitle}</h2>
-    <p>Hello, ${order.customerName}. We want to share a live update regarding your order request <strong>#${orderIdShort}</strong>.</p>
-    <div style="background-color: #F8EBDD; border-left: 4px solid #D49A55; padding: 16px; margin: 16px 0; border-radius: 0 8px 8px 0;">
-      <p style="margin: 0; font-size: 15px; font-weight: bold; capitalize;">Current Status: ${order.status.replace(/_/g, ' ')}</p>
-      <p style="margin: 8px 0 0 0; font-size: 13px; line-height: 1.4;">${statusDescription}</p>
-    </div>
-    <p>Target delivery window remains: <strong>${order.preferredDate} (${order.preferredTime})</strong>.</p>
-    <p>Track live updates and view directions on our portal:</p>
-    <div style="text-align: center;">
-      <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders" class="button">Track My Order</a>
-    </div>
-  `;
+  const variables = {
+    orderId: orderIdShort,
+    customerName: order.customerName,
+    customerEmail: order.customerEmail,
+    preferredDate: order.preferredDate,
+    preferredTime: order.preferredTime,
+    statusTitle,
+    statusDescription,
+    trackingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders`,
+  };
 
-  const html = getEmailBaseTemplate(`Order Status Update: ${order.status}`, emailContent);
+  const subject = replacePlaceholders(templateConfig.subject, variables);
+  const body = replacePlaceholders(templateConfig.body, variables);
+  const html = getEmailBaseTemplate(subject, body);
+
   await sendEmail({
     to: order.customerEmail,
-    subject: `📦 Update on Order #${orderIdShort}: ${order.status.replace(/_/g, ' ').toUpperCase()}`,
+    subject,
     html,
   });
 }

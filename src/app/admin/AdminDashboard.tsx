@@ -26,6 +26,10 @@ import {
   LogOut,
   AlertTriangle,
   Check,
+  Send,
+  Settings,
+  Eye,
+  Code,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -43,6 +47,11 @@ import {
   updateStaffUserAction,
   deleteStaffUserAction,
 } from '@/app/actions/authActions';
+import {
+  updateEmailSettingsAction,
+  sendTestEmailAction,
+  resetEmailSettingsAction,
+} from '@/app/actions/emailActions';
 
 interface OrderItem {
   productId: string;
@@ -135,6 +144,7 @@ interface AdminDashboardProps {
     role: 'admin' | 'kitchen' | 'courier';
   };
   initialStaffUsers: StaffUser[];
+  initialEmailSettings: any;
 }
 
 // Map custom marker icons type declaration for window context
@@ -165,11 +175,12 @@ export function AdminDashboard({
   bakeryCoords,
   currentUser,
   initialStaffUsers,
+  initialEmailSettings,
 }: AdminDashboardProps) {
   const router = useRouter();
 
-  // Roles toggler: admin, kitchen, courier, staff
-  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff'>(
+  // Roles toggler: admin, kitchen, courier, staff, email_settings
+  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings'>(
     currentUser.role === 'admin' ? 'admin' : currentUser.role
   );
 
@@ -365,6 +376,17 @@ export function AdminDashboard({
               >
                 <Shield className="size-4" /> Staff & Permissions
               </button>
+              <button
+                onClick={() => setActiveRole('email_settings')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'email_settings'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <Mail className="size-4" /> Email Config
+              </button>
             </>
           ) : (
             <div className="px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 text-xs font-bold capitalize flex items-center gap-1.5">
@@ -395,7 +417,7 @@ export function AdminDashboard({
           </button>
         </div>
       </header>
-
+ 
       {/* Conditionally Render active roles view */}
       {activeRole === 'admin' && (
         <AdminView
@@ -418,7 +440,7 @@ export function AdminDashboard({
           onUpdateStatus={handleUpdateStatus}
         />
       )}
-
+ 
       {activeRole === 'kitchen' && (
         <KitchenView
           orders={orders}
@@ -426,7 +448,7 @@ export function AdminDashboard({
           onPrintLabel={(o) => setPrintingOrder(o)}
         />
       )}
-
+ 
       {activeRole === 'courier' && (
         <CourierView
           route={route}
@@ -434,11 +456,17 @@ export function AdminDashboard({
           onUpdateStatus={handleUpdateStatus}
         />
       )}
-
+ 
       {activeRole === 'staff' && currentUser.role === 'admin' && (
         <StaffManagementView
           initialUsers={initialStaffUsers}
           currentUserEmail={currentUser.email}
+        />
+      )}
+ 
+      {activeRole === 'email_settings' && currentUser.role === 'admin' && (
+        <EmailSettingsView
+          initialSettings={initialEmailSettings}
         />
       )}
 
@@ -2012,6 +2040,723 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
               })}
             </tbody>
           </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SUB-COMPONENT: EMAIL CONFIGURATION & TEMPLATE DESIGNER
+   ========================================================================== */
+
+interface EmailSettingsViewProps {
+  initialSettings: any;
+}
+
+function renderMockTemplate(subject: string, body: string): string {
+  const mockTable = `
+    <table class="item-list" style="width: 100%; border-collapse: collapse; margin: 15px 0;">
+      <thead>
+        <tr style="border-bottom: 2px solid #5A3019; text-align: left; background-color: #F8EBDD;">
+          <th style="padding: 8px; font-size: 12px; text-transform: uppercase;">Cookie</th>
+          <th style="padding: 8px; font-size: 12px; text-transform: uppercase; text-align: center;">Quantity</th>
+          <th style="padding: 8px; font-size: 12px; text-transform: uppercase; text-align: right;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding: 8px; font-size: 13px;">Chocolate Chip Pecan</td>
+          <td style="padding: 8px; font-size: 13px; text-align: center;">6</td>
+          <td style="padding: 8px; font-size: 13px; text-align: right;">$24.00</td>
+        </tr>
+        <tr>
+          <td style="padding: 8px; font-size: 13px;">Salted Caramel Toffee</td>
+          <td style="padding: 8px; font-size: 13px; text-align: center;">4</td>
+          <td style="padding: 8px; font-size: 13px; text-align: right;">$18.00</td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+
+  const vars = {
+    orderId: '5D9F2B',
+    customerName: 'Jane Doe',
+    customerEmail: 'jane.doe@example.com',
+    totalPrice: '$42.00',
+    preferredDate: '2026-06-25',
+    preferredTime: '10:00 AM - 12:00 PM',
+    deliveryAddress: '123 Golden Gate Ave, San Francisco, CA',
+    itemsTable: mockTable,
+    trackingUrl: '#',
+    adminUrl: '#',
+    statusTitle: 'Baking in Progress',
+    statusDescription: 'Your artisan cookies have entered the kitchen prep stage and are now being freshly rolled and baked by our team.',
+  };
+
+  let renderedBody = body;
+  for (const [key, value] of Object.entries(vars)) {
+    renderedBody = renderedBody.split(`{{${key}}}`).join(value);
+  }
+
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F0E0D0;
+            color: #4A2718;
+            margin: 0;
+            padding: 15px;
+          }
+          .container {
+            max-width: 100%;
+            background-color: #FFF7EC;
+            border: 1px solid #D49A55;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+          }
+          .header {
+            background-color: #5A3019;
+            padding: 16px;
+            text-align: center;
+            border-bottom: 3px solid #D49A55;
+          }
+          .header h1 {
+            color: #F7EADD;
+            font-family: Georgia, serif;
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 1px;
+          }
+          .content {
+            padding: 24px 20px;
+            line-height: 1.5;
+            font-size: 13px;
+          }
+          .footer {
+            background-color: #F8EBDD;
+            padding: 12px;
+            text-align: center;
+            font-size: 10px;
+            color: #4A2718;
+            border-top: 1px solid #EAEAEA;
+          }
+          .footer a {
+            color: #D49A55;
+            text-decoration: none;
+            font-weight: bold;
+          }
+          .button {
+            display: inline-block;
+            background-color: #D49A55;
+            color: #FFF7EC !important;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 12px 0;
+            font-size: 12px;
+          }
+          .item-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+          }
+          .item-list th {
+            border-bottom: 2px solid #5A3019;
+            text-align: left;
+            padding: 6px;
+            font-size: 11px;
+            text-transform: uppercase;
+          }
+          .item-list td {
+            border-bottom: 1px solid #F8EBDD;
+            padding: 6px;
+            font-size: 12px;
+          }
+          .total {
+            text-align: right;
+            font-weight: bold;
+            font-size: 14px;
+            margin-top: 12px;
+            color: #D49A55;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h1>GOLDEN CRUMB</h1>
+          </div>
+          <div class="content">
+            ${renderedBody}
+          </div>
+          <div class="footer">
+            <p>Golden Crumb · Artisan Cookies · San Francisco, CA</p>
+            <p>Questions? Contact us on <a href="https://wa.me/15551234567">WhatsApp</a></p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `;
+}
+
+function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
+  const [provider, setProvider] = useState<'smtp' | 'resend' | 'mock'>(
+    initialSettings?.provider || 'mock'
+  );
+  const [resendApiKey, setResendApiKey] = useState(initialSettings?.resendApiKey || '');
+  const [smtpHost, setSmtpHost] = useState(initialSettings?.smtpHost || '');
+  const [smtpPort, setSmtpPort] = useState(Number(initialSettings?.smtpPort) || 587);
+  const [smtpSecure, setSmtpSecure] = useState(Boolean(initialSettings?.smtpSecure));
+  const [smtpUser, setSmtpUser] = useState(initialSettings?.smtpUser || '');
+  const [smtpPass, setSmtpPass] = useState(initialSettings?.smtpPass || '');
+  const [fromAddress, setFromAddress] = useState(
+    initialSettings?.fromAddress || 'Golden Crumb <orders@golden-crumb.com>'
+  );
+  const [adminAddress, setAdminAddress] = useState(
+    initialSettings?.adminAddress || 'admin@golden-crumb.com'
+  );
+
+  // Initialize templates map safely
+  const [templatesState, setTemplatesState] = useState<Record<string, { subject: string; body: string }>>(() => {
+    const defaults = {
+      customerConfirmation: { subject: '', body: '' },
+      adminConfirmation: { subject: '', body: '' },
+      statusKitchenPrep: { subject: '', body: '' },
+      statusReadyForDelivery: { subject: '', body: '' },
+      statusOutForDelivery: { subject: '', body: '' },
+      statusDelivered: { subject: '', body: '' },
+      statusCancelled: { subject: '', body: '' },
+    };
+    if (initialSettings?.templates) {
+      return { ...defaults, ...initialSettings.templates };
+    }
+    return defaults;
+  });
+
+  const [activeTemplateKey, setActiveTemplateKey] = useState<string>('customerConfirmation');
+  const [testRecipient, setTestRecipient] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [testing, setTesting] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Available templates labels and list
+  const templatesList = [
+    { key: 'customerConfirmation', label: 'Order Confirmed (Customer)' },
+    { key: 'adminConfirmation', label: 'New Order Alert (Admin)' },
+    { key: 'statusKitchenPrep', label: 'Status: Baking (Customer)' },
+    { key: 'statusReadyForDelivery', label: 'Status: Ready (Customer)' },
+    { key: 'statusOutForDelivery', label: 'Status: Out for Delivery' },
+    { key: 'statusDelivered', label: 'Status: Delivered' },
+    { key: 'statusCancelled', label: 'Status: Cancelled' },
+  ];
+
+  // Map of placeholders by template
+  const getPlaceholders = (key: string) => {
+    if (key === 'customerConfirmation' || key === 'adminConfirmation') {
+      return [
+        'orderId',
+        'customerName',
+        'customerEmail',
+        'itemsTable',
+        'totalPrice',
+        'preferredDate',
+        'preferredTime',
+        'deliveryAddress',
+        key === 'customerConfirmation' ? 'trackingUrl' : 'adminUrl',
+      ];
+    }
+    return [
+      'orderId',
+      'customerName',
+      'customerEmail',
+      'preferredDate',
+      'preferredTime',
+      'statusTitle',
+      'statusDescription',
+      'trackingUrl',
+    ];
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const payload = {
+        provider,
+        resendApiKey,
+        smtpHost,
+        smtpPort,
+        smtpSecure,
+        smtpUser,
+        smtpPass,
+        fromAddress,
+        adminAddress,
+        templates: templatesState,
+      };
+
+      const res = await updateEmailSettingsAction(payload);
+      if (res.success) {
+        setFeedback({ type: 'success', message: 'Email configuration and templates saved successfully!' });
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to save email configuration.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred while saving.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReset = async () => {
+    if (!confirm('Are you sure you want to reset all email configurations and templates to default values? This will wipe your custom configurations.')) {
+      return;
+    }
+
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const res = await resetEmailSettingsAction();
+      if (res.success) {
+        setFeedback({ type: 'success', message: 'Email settings reset to system defaults!' });
+        // Reload fresh settings
+        window.location.reload();
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to reset settings.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred while resetting.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendTest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testRecipient.trim()) return;
+
+    setFeedback(null);
+    setTesting(true);
+
+    try {
+      const res = await sendTestEmailAction(testRecipient);
+      if (res.success) {
+        setFeedback({ type: 'success', message: `Test email dispatched to ${testRecipient}! Check your inbox or the mock preview directory.` });
+        setTestRecipient('');
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to dispatch test email.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred while testing.' });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  const insertPlaceholder = (ph: string) => {
+    const textarea = document.getElementById('template-body-textarea') as HTMLTextAreaElement;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const text = textarea.value;
+      const before = text.substring(0, start);
+      const after = text.substring(end, text.length);
+      const newBody = before + `{{${ph}}}` + after;
+
+      setTemplatesState((prev) => ({
+        ...prev,
+        [activeTemplateKey]: {
+          ...prev[activeTemplateKey],
+          body: newBody,
+        },
+      }));
+
+      setTimeout(() => {
+        textarea.focus();
+        textarea.setSelectionRange(start + ph.length + 4, start + ph.length + 4);
+      }, 0);
+    }
+  };
+
+  // Generate preview HTML dynamically
+  const activeTemplate = templatesState[activeTemplateKey] || { subject: '', body: '' };
+  const previewHtml = renderMockTemplate(activeTemplate.subject, activeTemplate.body);
+
+  return (
+    <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="font-serif text-xl font-bold flex items-center gap-2">
+            <Mail className="size-5 text-[#D49A55]" /> Email &amp; SMTP Configuration
+          </h2>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Configure SMTP, Resend, or local file mock previews. Customize subject lines and responsive HTML templates.
+          </p>
+        </div>
+      </div>
+
+      {feedback && (
+        <div
+          className={cn(
+            'p-3.5 rounded-xl text-xs flex items-start gap-2.5 border leading-relaxed',
+            feedback.type === 'success'
+              ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-300'
+              : 'bg-red-500/10 border-red-500/20 text-red-600'
+          )}
+        >
+          {feedback.type === 'success' ? (
+            <Check className="size-4 shrink-0 mt-0.5" />
+          ) : (
+            <AlertTriangle className="size-4 shrink-0 mt-0.5" />
+          )}
+          <span>{feedback.message}</span>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Connection Configuration: Occupies left 2 columns */}
+        <div className="lg:col-span-2 flex flex-col gap-6">
+          <form onSubmit={handleSave} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
+            <div>
+              <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                1. Delivery Method Settings
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Choose how Golden Crumb sends customer notification emails.
+              </p>
+            </div>
+
+            {/* Provider Cards */}
+            <div className="grid grid-cols-3 gap-2.5">
+              {(['mock', 'resend', 'smtp'] as const).map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setProvider(p)}
+                  className={cn(
+                    'p-3.5 rounded-xl border text-center font-bold text-xs capitalize transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-95',
+                    provider === p
+                      ? 'bg-[#D49A55] text-white border-transparent'
+                      : 'bg-[#FFF7EC] dark:bg-[#5A3019] border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-inherit'
+                  )}
+                >
+                  {p === 'mock' && <Code className="size-4" />}
+                  {p === 'resend' && <Send className="size-4" />}
+                  {p === 'smtp' && <Settings className="size-4" />}
+                  <span className="text-[10px] tracking-tight">
+                    {p === 'mock' ? 'Local File' : p === 'resend' ? 'Resend' : 'SMTP Server'}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Provider Instructions */}
+            <div className="text-[11px] bg-[#FFF7EC] dark:bg-[#5A3019] p-3 rounded-xl border border-[#D49A55]/10 italic text-[#4A2718]/80 dark:text-[#F7EADD]/80">
+              {provider === 'mock' && (
+                <p>
+                  <strong>Mock Preview Mode:</strong> No actual emails will be sent. Dispatched emails will be saved locally inside <code>artifacts/mock-emails/</code> as HTML preview files for easy styling inspection.
+                </p>
+              )}
+              {provider === 'resend' && (
+                <p>
+                  <strong>Resend API Mode:</strong> Sends transactional emails via Resend's high-delivery API endpoints. Requires a valid API Key.
+                </p>
+              )}
+              {provider === 'smtp' && (
+                <p>
+                  <strong>SMTP Mode:</strong> Connects to a standard custom SMTP mail relay (e.g. Gmail SMTP, SendGrid, Amazon SES, or local mail servers).
+                </p>
+              )}
+            </div>
+
+            {/* Resend Fields */}
+            {provider === 'resend' && (
+              <div className="flex flex-col gap-1.5 animate-fadeIn animate-duration-200">
+                <label htmlFor="resend-api-key" className="text-xs font-semibold text-muted-foreground">Resend API Key</label>
+                <input
+                  id="resend-api-key"
+                  type="password"
+                  value={resendApiKey}
+                  onChange={(e) => setResendApiKey(e.target.value)}
+                  placeholder="re_123456789..."
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                />
+              </div>
+            )}
+
+            {/* SMTP Fields */}
+            {provider === 'smtp' && (
+              <div className="flex flex-col gap-3.5 animate-fadeIn animate-duration-200">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="col-span-2 flex flex-col gap-1.5">
+                    <label htmlFor="smtp-host" className="text-xs font-semibold text-muted-foreground">SMTP Host</label>
+                    <input
+                      id="smtp-host"
+                      type="text"
+                      value={smtpHost}
+                      onChange={(e) => setSmtpHost(e.target.value)}
+                      placeholder="smtp.example.com"
+                      className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label htmlFor="smtp-port" className="text-xs font-semibold text-muted-foreground">Port</label>
+                    <input
+                      id="smtp-port"
+                      type="number"
+                      value={smtpPort}
+                      onChange={(e) => setSmtpPort(Number(e.target.value))}
+                      placeholder="587"
+                      className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 py-0.5">
+                  <input
+                    id="smtp-secure"
+                    type="checkbox"
+                    checked={smtpSecure}
+                    onChange={(e) => setSmtpSecure(e.target.checked)}
+                    className="rounded border-gray-300 text-[#D49A55] focus:ring-[#D49A55]"
+                  />
+                  <label htmlFor="smtp-secure" className="text-xs font-semibold text-muted-foreground">
+                    Use Secure SSL Connection (usually Port 465)
+                  </label>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="smtp-user" className="text-xs font-semibold text-muted-foreground">SMTP Username</label>
+                  <input
+                    id="smtp-user"
+                    type="text"
+                    value={smtpUser}
+                    onChange={(e) => setSmtpUser(e.target.value)}
+                    placeholder="user@example.com"
+                    className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label htmlFor="smtp-pass" className="text-xs font-semibold text-muted-foreground">SMTP Password</label>
+                  <input
+                    id="smtp-pass"
+                    type="password"
+                    value={smtpPass}
+                    onChange={(e) => setSmtpPass(e.target.value)}
+                    placeholder="••••••••••••••"
+                    className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Sender / Receivers addresses */}
+            <div className="flex flex-col gap-3.5 border-t border-primary/5 pt-4">
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="from-address" className="text-xs font-semibold text-muted-foreground">From Address (Sender Display)</label>
+                <input
+                  id="from-address"
+                  type="text"
+                  value={fromAddress}
+                  onChange={(e) => setFromAddress(e.target.value)}
+                  placeholder="Golden Crumb <orders@golden-crumb.com>"
+                  required
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                />
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="admin-address" className="text-xs font-semibold text-muted-foreground">Admin Alert Recipient</label>
+                <input
+                  id="admin-address"
+                  type="email"
+                  value={adminAddress}
+                  onChange={(e) => setAdminAddress(e.target.value)}
+                  placeholder="admin@golden-crumb.com"
+                  required
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 mt-1.5 pt-4 border-t border-primary/5">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+              >
+                {loading ? 'Saving Settings...' : 'Save Settings'}
+              </button>
+              <button
+                type="button"
+                onClick={handleReset}
+                disabled={loading}
+                className="px-3.5 py-2.5 border border-red-500/20 hover:bg-red-500/10 text-red-600 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center"
+                title="Reset to defaults"
+              >
+                <RotateCcw className="size-4" />
+              </button>
+            </div>
+          </form>
+
+          {/* Test email module */}
+          <form onSubmit={handleSendTest} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+            <div>
+              <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                2. Delivery Diagnostics
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Send a live test message to confirm server or Resend API response.
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="test-recipient" className="text-xs font-semibold text-muted-foreground">Recipient Email Address</label>
+              <div className="flex gap-2">
+                <input
+                  id="test-recipient"
+                  type="email"
+                  value={testRecipient}
+                  onChange={(e) => setTestRecipient(e.target.value)}
+                  placeholder="test@example.com"
+                  required
+                  className="flex-1 bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55]"
+                />
+                <button
+                  type="submit"
+                  disabled={testing || !testRecipient}
+                  className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {testing ? 'Sending...' : 'Send Test'} <Send className="size-3.5" />
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        {/* Templates Customization Canvas: Occupies right 3 columns */}
+        <div className="lg:col-span-3 flex flex-col gap-5">
+          <div className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
+            <div>
+              <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                3. HTML Template Canvas
+              </h3>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Edit responsive layout content and dynamic subject lines. Changes will take effect once saved.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Select template */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="active-template-select" className="text-xs font-semibold text-muted-foreground">Choose Template</label>
+                <select
+                  id="active-template-select"
+                  value={activeTemplateKey}
+                  onChange={(e) => setActiveTemplateKey(e.target.value)}
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2.5 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-bold text-inherit"
+                >
+                  {templatesList.map((t) => (
+                    <option key={t.key} value={t.key}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Subject Input */}
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="template-subject" className="text-xs font-semibold text-muted-foreground">Email Subject Line</label>
+                <input
+                  id="template-subject"
+                  type="text"
+                  value={activeTemplate.subject}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTemplatesState((prev) => ({
+                      ...prev,
+                      [activeTemplateKey]: { ...prev[activeTemplateKey], subject: val },
+                    }));
+                  }}
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-semibold text-inherit"
+                />
+              </div>
+            </div>
+
+            {/* Editor vs Preview Tabs */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-5 mt-1">
+              {/* Column A: Body Editor */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="template-body-textarea" className="text-xs font-semibold text-muted-foreground">HTML Body</label>
+                  <span className="text-[10px] text-muted-foreground/60 italic font-mono">&lt;body&gt; wrapper applied</span>
+                </div>
+                <textarea
+                  id="template-body-textarea"
+                  rows={14}
+                  value={activeTemplate.body}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setTemplatesState((prev) => ({
+                      ...prev,
+                      [activeTemplateKey]: { ...prev[activeTemplateKey], body: val },
+                    }));
+                  }}
+                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl p-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-mono leading-relaxed text-inherit"
+                />
+
+                {/* Clickable Placeholders helper */}
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Available variables:</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getPlaceholders(activeTemplateKey).map((ph) => (
+                      <button
+                        key={ph}
+                        type="button"
+                        onClick={() => insertPlaceholder(ph)}
+                        className="px-2 py-1 bg-[#FFF7EC] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 border border-[#D49A55]/10 hover:border-[#D49A55]/30 rounded-lg text-[10px] font-mono font-semibold transition-all active:scale-95 text-inherit"
+                        title="Click to insert at cursor"
+                      >
+                        {`{{${ph}}}`}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Column B: Live Canvas Preview */}
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-muted-foreground flex items-center gap-1.5">
+                    <Eye className="size-4 text-[#D49A55]" /> Live Render Preview
+                  </span>
+                  <span className="text-[9px] bg-green-500/10 text-green-600 px-1.5 py-0.5 rounded font-mono font-bold uppercase">
+                    Sandbox Mock
+                  </span>
+                </div>
+                <div className="border border-[#D49A55]/20 rounded-2xl overflow-hidden shadow-inner bg-[#F0E0D0] h-[340px] xl:h-[390px] relative">
+                  <iframe
+                    title="Live Preview frame"
+                    srcDoc={previewHtml}
+                    className="w-full h-full border-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

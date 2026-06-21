@@ -1,6 +1,7 @@
 import { AdminDashboard, OrderData, CustomerData, RouteStop } from './AdminDashboard';
 import { getDashboardData, getTodayDeliveries } from '@/app/actions/dbActions';
 import { getCurrentSession } from '@/app/actions/authActions';
+import { getEmailSettingsAction } from '@/app/actions/emailActions';
 import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/User';
 
@@ -8,9 +9,10 @@ export const dynamic = 'force-dynamic';
 
 export default async function AdminPage() {
   const session = await getCurrentSession();
-
+  
   const dashboardResult = await getDashboardData();
   const deliveryResult = await getTodayDeliveries();
+  const emailSettingsResult = await getEmailSettingsAction();
 
   const initialStats = (dashboardResult.success && dashboardResult.stats)
     ? dashboardResult.stats
@@ -24,6 +26,8 @@ export default async function AdminPage() {
   const bakeryCoords = (deliveryResult.success && deliveryResult.bakeryCoords)
     ? deliveryResult.bakeryCoords
     : { lat: 37.7749, lng: -122.4194 };
+
+  const initialEmailSettings = emailSettingsResult.success ? emailSettingsResult.settings : null;
 
   // Fetch staff users if the logged-in user is admin
   let initialStaffUsers: { _id: string; name: string; email: string; role: 'admin' | 'kitchen' | 'courier'; createdAt: string }[] = [];
@@ -57,6 +61,7 @@ export default async function AdminPage() {
           bakeryCoords={bakeryCoords}
           currentUser={currentUser}
           initialStaffUsers={initialStaffUsers}
+          initialEmailSettings={initialEmailSettings}
         />
       </div>
     </main>
