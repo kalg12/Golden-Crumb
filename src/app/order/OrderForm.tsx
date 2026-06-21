@@ -36,6 +36,7 @@ interface LeafletMarker {
 
 interface LeafletMap {
   remove: () => void;
+  setView: (coords: [number, number], zoom: number) => void;
   on: (
     event: string,
     callback: (e: { latlng: { lat: number; lng: number } }) => void
@@ -141,6 +142,7 @@ export function OrderForm() {
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [isUserTyping, setIsUserTyping] = useState(false);
 
   const update = <K extends keyof FormData>(key: K, value: FormData[K]) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -317,6 +319,7 @@ export function OrderForm() {
     markerRef.current = marker;
 
     const handleLocationChange = async (lat: number, lng: number) => {
+      setIsUserTyping(false);
       setForm((prev) => ({ ...prev, lat, lng }));
       try {
         const response = await fetch(
@@ -358,6 +361,43 @@ export function OrderForm() {
       }
     };
   }, [mapLoaded]);
+
+  // Forward geocoding: locate typed address on the map automatically
+  useEffect(() => {
+    if (!isUserTyping || !form.address.line1.trim() || !mapRef.current || !markerRef.current) return;
+
+    const delayDebounce = setTimeout(async () => {
+      try {
+        const query = `${form.address.line1}, San Francisco, CA`;
+        const response = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1`
+        );
+        if (response.ok) {
+          const data = await response.json();
+          if (data && data.length > 0) {
+            const firstResult = data[0];
+            const lat = parseFloat(firstResult.lat);
+            const lng = parseFloat(firstResult.lon);
+
+            // Update React state coordinates
+            setForm((prev) => ({ ...prev, lat, lng }));
+
+            // Update map view and marker visual coordinates
+            if (markerRef.current) {
+              markerRef.current.setLatLng([lat, lng]);
+            }
+            if (mapRef.current) {
+              mapRef.current.setView([lat, lng], 15);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Forward geocoding failed:", err);
+      }
+    }, 1000);
+
+    return () => clearTimeout(delayDebounce);
+  }, [form.address.line1, isUserTyping]);
 
   if (submitted) {
     return (
@@ -498,7 +538,10 @@ export function OrderForm() {
                 <Input
                   id="addressLine1"
                   value={form.address.line1}
-                  onChange={(e) => updateAddress("line1", e.target.value)}
+                  onChange={(e) => {
+                    setIsUserTyping(true);
+                    updateAddress("line1", e.target.value);
+                  }}
                   required
                   placeholder="123 Main St"
                   autoComplete="address-line1"
