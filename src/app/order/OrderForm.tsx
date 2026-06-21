@@ -22,6 +22,7 @@ import {
 import { SOCIAL } from "@/lib/constants";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
+import { createOrderAction } from "@/app/actions/dbActions";
 
 interface LeafletIcon {
   _leaflet_id?: number;
@@ -72,6 +73,8 @@ interface FormData {
   preferredTime: string;
   notes: string;
   allergyConfirmed: boolean;
+  lat: number;
+  lng: number;
 }
 
 const initialAddress: AddressFields = {
@@ -96,6 +99,8 @@ const initialForm: FormData = {
   preferredTime: "",
   notes: "",
   allergyConfirmed: false,
+  lat: 37.7749,
+  lng: -122.4194,
 };
 
 const TIME_SLOTS = [
@@ -155,7 +160,7 @@ export function OrderForm() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.preferredDate) {
       setValidationError("Please select a preferred delivery date.");
@@ -165,8 +170,44 @@ export function OrderForm() {
       setValidationError("Please select a preferred delivery time.");
       return;
     }
+
+    const totalCookiesCount = Object.values(form.quantities).reduce((a, b) => a + b, 0);
+    if (totalCookiesCount === 0) {
+      setValidationError("Please select at least one cookie to order.");
+      return;
+    }
+
+    if (!form.allergyConfirmed) {
+      setValidationError("Please confirm that you have reviewed the allergen notice.");
+      return;
+    }
+
     setValidationError(null);
-    setSubmitted(true);
+
+    try {
+      const res = await createOrderAction({
+        name: form.name,
+        phone: form.phone,
+        email: form.email,
+        address: form.address,
+        addressReference: form.addressReference,
+        quantities: form.quantities,
+        preferredDate: form.preferredDate,
+        preferredTime: form.preferredTime,
+        notes: form.notes,
+        lat: form.lat,
+        lng: form.lng,
+      });
+
+      if (res.success) {
+        setSubmitted(true);
+      } else {
+        setValidationError(res.error || "Failed to submit order request. Please try again.");
+      }
+    } catch (err) {
+      console.error("Order submission error:", err);
+      setValidationError("An error occurred during order submission. Please try again.");
+    }
   };
 
   const selectedProducts = useMemo(
@@ -276,6 +317,7 @@ export function OrderForm() {
     markerRef.current = marker;
 
     const handleLocationChange = async (lat: number, lng: number) => {
+      setForm((prev) => ({ ...prev, lat, lng }));
       try {
         const response = await fetch(
           `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
@@ -287,7 +329,10 @@ export function OrderForm() {
           const houseNumber = addressData?.house_number || "";
           const streetAddress = houseNumber ? `${houseNumber} ${road}` : road;
           if (streetAddress) {
-            updateAddress("line1", streetAddress);
+            setForm((prev) => ({
+              ...prev,
+              address: { ...prev.address, line1: streetAddress },
+            }));
           }
         }
       } catch (err) {
