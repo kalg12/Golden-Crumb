@@ -1,4 +1,13 @@
 import mongoose from 'mongoose';
+import dns from 'dns';
+
+try {
+  // Set DNS servers to Cloudflare and Google to prevent querySrv ECONNREFUSED issues on local Windows dev environment
+  dns.setServers(['1.1.1.1', '8.8.8.8']);
+} catch (err) {
+  console.warn('Warning: Failed to set custom DNS servers for MongoDB SRV resolution:', err);
+}
+
 
 const MONGODB_URI = process.env.MONGODB_URI;
 
