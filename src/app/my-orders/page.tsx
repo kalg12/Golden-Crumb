@@ -37,7 +37,7 @@ export default async function MyOrdersPage() {
   }));
 
   return (
-    <main className="min-h-screen bg-[#F0E0D0] dark:bg-[#482612] py-8 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-screen bg-[#F0E0D0] dark:bg-[#3A1D10] py-8 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-5xl">
         <MyOrdersDashboard
           customerName={session.name || 'Valued Customer'}

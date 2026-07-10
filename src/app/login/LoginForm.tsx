@@ -50,7 +50,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-8 rounded-2xl border border-primary/10 shadow-lg flex flex-col gap-6 text-[#4A2718] dark:text-[#F7EADD]">
+    <div className="bg-[#FFF7EC] dark:bg-[#482612] p-8 rounded-2xl border border-primary/10 shadow-lg flex flex-col gap-6 text-[#4A2718] dark:text-[#F7EADD]">
       <div className="text-center flex flex-col gap-1.5">
         <h2 className="font-serif text-2xl font-black uppercase tracking-tight">
           GOLDEN CRUMB
@@ -61,7 +61,7 @@ export function LoginForm() {
       </div>
 
       {/* Tabs */}
-      <div className="flex bg-[#F8EBDD] dark:bg-[#64371F] p-1 rounded-xl border border-primary/5">
+      <div className="flex bg-[#F8EBDD] dark:bg-[#5A3019] p-1 rounded-xl border border-primary/5">
         <button
           type="button"
           onClick={() => {
@@ -114,7 +114,7 @@ export function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             placeholder="hello@example.com"
-            className="w-full bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+            className="w-full bg-[#F8EBDD]/60 dark:bg-[#5A3019]/40 border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
           />
         </div>
 
@@ -129,7 +129,7 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
             placeholder="••••••••"
-            className="w-full bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+            className="w-full bg-[#F8EBDD]/60 dark:bg-[#5A3019]/40 border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
           />
         </div>
 

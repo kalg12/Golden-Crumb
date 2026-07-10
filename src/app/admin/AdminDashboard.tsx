@@ -364,7 +364,7 @@ export function AdminDashboard({
   return (
     <div className="flex flex-col gap-6 font-sans text-[#4A2718] dark:text-[#F7EADD]">
       {/* Role SWITCHER Header */}
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#FFF7EC] dark:bg-[#5A3019] p-4 rounded-2xl shadow-sm border border-primary/10">
+      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-[#FFF7EC] dark:bg-[#482612] p-4 rounded-2xl shadow-sm border border-primary/10">
         <div>
           <h1 className="font-serif text-2xl font-bold tracking-tight">
             Golden Crumb · <span className="text-[#D49A55]">HQ Portal</span>
@@ -382,7 +382,7 @@ export function AdminDashboard({
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'admin'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
-                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <TrendingUp className="size-4" /> Admin Dashboard
@@ -393,7 +393,7 @@ export function AdminDashboard({
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm relative overflow-visible',
                   activeRole === 'kitchen'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
-                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <Clock className="size-4" /> Kitchen Screen (KDS)
@@ -420,7 +420,7 @@ export function AdminDashboard({
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'courier'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
-                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <Truck className="size-4" /> Courier Routing
@@ -431,7 +431,7 @@ export function AdminDashboard({
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'staff'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
-                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <Shield className="size-4" /> Staff & Permissions
@@ -442,7 +442,7 @@ export function AdminDashboard({
                   'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
                   activeRole === 'email_settings'
                     ? 'bg-[#D49A55] text-[#FFF7EC]'
-                    : 'bg-[#F8EBDD] dark:bg-[#64371F] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
                 )}
               >
                 <Mail className="size-4" /> Email Config
@@ -464,7 +464,7 @@ export function AdminDashboard({
           <button
             onClick={refreshData}
             disabled={loading}
-            className="p-2 bg-[#F8EBDD] dark:bg-[#64371F] border border-[#D49A55]/20 rounded-xl hover:bg-[#D49A55]/10 active:scale-95 transition-all text-[#D49A55]"
+            className="p-2 bg-[#F8EBDD] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl hover:bg-[#D49A55]/10 active:scale-95 transition-all text-[#D49A55]"
             title="Refresh database"
           >
             <RotateCcw className={cn('size-4', loading && 'animate-spin')} />
@@ -629,7 +629,7 @@ function AdminView({
     <div className="flex flex-col gap-6">
       {/* Metrics Row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
           <div className="size-11 rounded-xl bg-green-500/10 text-green-600 flex items-center justify-center shrink-0">
             <DollarSign className="size-5" />
           </div>
@@ -641,7 +641,7 @@ function AdminView({
           </div>
         </div>
 
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
           <div className="size-11 rounded-xl bg-[#D49A55]/10 text-[#D49A55] flex items-center justify-center shrink-0">
             <ShoppingBag className="size-5" />
           </div>
@@ -653,7 +653,7 @@ function AdminView({
           </div>
         </div>
 
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
           <div className="size-11 rounded-xl bg-blue-500/10 text-blue-600 flex items-center justify-center shrink-0">
             <ShoppingBag className="size-5" />
           </div>
@@ -665,7 +665,7 @@ function AdminView({
           </div>
         </div>
 
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm flex items-center gap-4">
           <div className="size-11 rounded-xl bg-purple-500/10 text-purple-600 flex items-center justify-center shrink-0">
             <Users className="size-5" />
           </div>
@@ -683,7 +683,7 @@ function AdminView({
         {/* Left 2 Columns: Trend Chart & Live Queue */}
         <div className="xl:col-span-2 flex flex-col gap-6">
           {/* Trend Chart Card */}
-          <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
+          <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
             <div>
               <h3 className="font-serif text-lg font-bold flex items-center gap-2">
                 <TrendingUp className="size-5 text-[#D49A55]" /> Weekly Sales Trend
@@ -757,7 +757,7 @@ function AdminView({
                           cx={x}
                           cy={y}
                           r="5"
-                          className="fill-[#FFF7EC] dark:fill-[#5A3019] stroke-[#D49A55] stroke-[2.5]"
+                          className="fill-[#FFF7EC] dark:fill-[#482612] stroke-[#D49A55] stroke-[2.5]"
                         />
                         {/* Text Date Label */}
                         <text
@@ -790,7 +790,7 @@ function AdminView({
           </div>
 
           {/* Active Orders Queue Card */}
-          <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
+          <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
                 <h3 className="font-serif text-lg font-bold flex items-center gap-2">
@@ -802,7 +802,7 @@ function AdminView({
               </div>
 
               {/* Status Filters */}
-              <div className="flex items-center gap-1.5 bg-[#F8EBDD] dark:bg-[#64371F] p-1 rounded-xl border border-primary/10">
+              <div className="flex items-center gap-1.5 bg-[#F8EBDD] dark:bg-[#5A3019] p-1 rounded-xl border border-primary/10">
                 {['all', 'pending', 'kitchen_prep', 'ready_for_delivery', 'delivered'].map((st) => (
                   <button
                     key={st}
@@ -828,7 +828,7 @@ function AdminView({
                 placeholder="Search orders by customer name, phone, or order ID..."
                 value={orderSearch}
                 onChange={(e) => setOrderSearch(e.target.value)}
-                className="w-full bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border border-[#D49A55]/20 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#D49A55]"
+                className="w-full bg-[#F8EBDD]/60 dark:bg-[#5A3019]/40 border border-[#D49A55]/20 rounded-xl py-2 pl-10 pr-4 text-sm focus:outline-none focus:border-[#D49A55]"
               />
             </div>
 
@@ -836,7 +836,7 @@ function AdminView({
             <div className="overflow-x-auto border border-primary/10 rounded-xl bg-[#F8EBDD]/20">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
-                  <tr className="bg-[#F8EBDD] dark:bg-[#64371F] border-b border-primary/10 text-muted-foreground font-semibold">
+                  <tr className="bg-[#F8EBDD] dark:bg-[#5A3019] border-b border-primary/10 text-muted-foreground font-semibold">
                     <th className="p-3">Order ID</th>
                     <th className="p-3">Customer</th>
                     <th className="p-3">Items</th>
@@ -938,7 +938,7 @@ function AdminView({
         </div>
 
         {/* Right 1 Column: CRM Customer Directory */}
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
           <div>
             <h3 className="font-serif text-lg font-bold flex items-center gap-2">
               <Users className="size-5 text-[#D49A55]" /> Customer CRM Database
@@ -955,7 +955,7 @@ function AdminView({
               placeholder="Search by name, email, phone..."
               value={crmSearch}
               onChange={(e) => setCrmSearch(e.target.value)}
-              className="w-full bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border border-[#D49A55]/20 rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-[#D49A55]"
+              className="w-full bg-[#F8EBDD]/60 dark:bg-[#5A3019]/40 border border-[#D49A55]/20 rounded-xl py-2 pl-9 pr-4 text-xs focus:outline-none focus:border-[#D49A55]"
             />
           </div>
 
@@ -994,7 +994,7 @@ function AdminView({
 
           {/* CRM Details Overlay Panel */}
           {activeCustomer && (
-            <div className="p-4 bg-[#F8EBDD] dark:bg-[#64371F] rounded-xl border border-[#D49A55]/30 flex flex-col gap-3 shadow-inner text-xs">
+            <div className="p-4 bg-[#F8EBDD] dark:bg-[#5A3019] rounded-xl border border-[#D49A55]/30 flex flex-col gap-3 shadow-inner text-xs">
               <div className="flex items-center justify-between border-b border-primary/10 pb-2">
                 <span className="font-serif font-bold text-sm text-[#4A2718] dark:text-[#F7EADD]">
                   Customer Profile
@@ -1031,7 +1031,7 @@ function AdminView({
                   {activeCustomerOrders.map((o) => (
                     <div
                       key={o._id}
-                      className="p-2 bg-[#FFF7EC]/60 dark:bg-[#5A3019]/60 rounded-lg border border-primary/5 flex items-center justify-between text-[10px]"
+                      className="p-2 bg-[#FFF7EC]/60 dark:bg-[#482612]/60 rounded-lg border border-primary/5 flex items-center justify-between text-[10px]"
                     >
                       <div>
                         <span className="font-semibold block font-mono text-[9px]">
@@ -1104,7 +1104,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
         </div>
 
         {/* Counts overview */}
-        <div className="flex flex-wrap items-center gap-3 text-xs bg-[#FFF7EC] dark:bg-[#5A3019] p-3 rounded-2xl border border-primary/10 shadow-sm font-semibold text-inherit shrink-0">
+        <div className="flex flex-wrap items-center gap-3 text-xs bg-[#FFF7EC] dark:bg-[#482612] p-3 rounded-2xl border border-primary/10 shadow-sm font-semibold text-inherit shrink-0">
           <div className="flex items-center gap-1.5">
             <span className="size-2 rounded-full bg-amber-400"></span>
             <span>Queue: {pendingOrders.length}</span>
@@ -1125,12 +1125,12 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
       {/* 3-Column Kanban Board Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Column 1: Queue (Pending) */}
-        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#5A3019]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
           <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
             <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-amber-400"></span> Queued for Baking
             </h4>
-            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#482612] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
               {pendingOrders.length}
             </span>
           </div>
@@ -1146,7 +1146,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                 />
               ))
             ) : (
-              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#482612]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
                 No orders waiting.
               </div>
             )}
@@ -1154,12 +1154,12 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
         </div>
 
         {/* Column 2: In Preparation (Baking) */}
-        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#5A3019]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
           <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
             <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-amber-600 animate-pulse"></span> In Ovens (Baking)
             </h4>
-            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#482612] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
               {prepOrders.length}
             </span>
           </div>
@@ -1175,7 +1175,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                 />
               ))
             ) : (
-              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#482612]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
                 Ovens are empty.
               </div>
             )}
@@ -1183,12 +1183,12 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
         </div>
 
         {/* Column 3: Ready / Completed */}
-        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
+        <div className="flex flex-col gap-4 bg-[#F8EBDD]/40 dark:bg-[#5A3019]/20 p-4 rounded-2xl border border-primary/5 min-h-[400px]">
           <div className="flex items-center justify-between border-b border-primary/10 pb-2 mb-1">
             <h4 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <span className="size-2 rounded-full bg-green-500"></span> Ready / Packaged
             </h4>
-            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#5A3019] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
+            <span className="font-mono text-xs bg-[#FFF7EC] dark:bg-[#482612] px-2.5 py-0.5 rounded-full border border-primary/5 font-bold shadow-sm">
               {readyOrders.length}
             </span>
           </div>
@@ -1204,7 +1204,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                 />
               ))
             ) : (
-              <div className="bg-[#FFF7EC]/30 dark:bg-[#5A3019]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+              <div className="bg-[#FFF7EC]/30 dark:bg-[#482612]/10 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
                 No ready orders.
               </div>
             )}
@@ -1234,7 +1234,7 @@ function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderC
   return (
     <div
       className={cn(
-        'rounded-2xl border p-4 flex flex-col gap-3.5 shadow-sm transition-all bg-[#FFF7EC] dark:bg-[#5A3019]',
+        'rounded-2xl border p-4 flex flex-col gap-3.5 shadow-sm transition-all bg-[#FFF7EC] dark:bg-[#482612]',
         order.status === 'kitchen_prep'
           ? 'border-[#D49A55]/40 shadow-inner'
           : 'border-primary/10'
@@ -1256,7 +1256,7 @@ function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderC
               {prepDurationText}
             </span>
           ) : (
-            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-[#F8EBDD] text-muted-foreground dark:bg-[#64371F]">
+            <span className="text-[9px] font-semibold px-2 py-0.5 rounded bg-[#F8EBDD] text-muted-foreground dark:bg-[#5A3019]">
               Queued
             </span>
           )}
@@ -1282,7 +1282,7 @@ function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderC
 
       {/* Notes / Landmark Address details */}
       {(order.notes || order.addressReference) && (
-        <div className="bg-[#F8EBDD]/40 dark:bg-[#64371F]/20 p-2.5 rounded-xl border border-primary/5 text-[10px] leading-relaxed flex flex-col gap-1 text-inherit">
+        <div className="bg-[#F8EBDD]/40 dark:bg-[#5A3019]/20 p-2.5 rounded-xl border border-primary/5 text-[10px] leading-relaxed flex flex-col gap-1 text-inherit">
           {order.notes && (
             <p>
               <span className="font-semibold text-inherit">Note:</span> {order.notes}
@@ -1747,7 +1747,7 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
               return (
                 <div
                   key={stop._id}
-                  className="bg-[#FFF7EC] dark:bg-[#5A3019] border border-primary/10 rounded-2xl p-4 flex flex-col gap-3 shadow-sm"
+                  className="bg-[#FFF7EC] dark:bg-[#482612] border border-primary/10 rounded-2xl p-4 flex flex-col gap-3 shadow-sm"
                 >
                   {/* Sequence Marker Header */}
                   <div className="flex items-center justify-between border-b border-primary/5 pb-2">
@@ -1772,7 +1772,7 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
                       Requested time: {stop.preferredDate} ({stop.preferredTime})
                     </p>
                     {stop.addressReference && (
-                      <p className="text-[10px] bg-[#F8EBDD] dark:bg-[#64371F] p-2 rounded-lg italic text-muted-foreground mt-1">
+                      <p className="text-[10px] bg-[#F8EBDD] dark:bg-[#5A3019] p-2 rounded-lg italic text-muted-foreground mt-1">
                         Landmark: {stop.addressReference}
                       </p>
                     )}
@@ -1806,7 +1806,7 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
               );
             })
           ) : (
-            <div className="bg-[#FFF7EC]/50 dark:bg-[#5A3019]/50 border border-dashed border-primary/20 rounded-2xl py-12 text-center text-muted-foreground text-xs">
+            <div className="bg-[#FFF7EC]/50 dark:bg-[#482612]/50 border border-dashed border-primary/20 rounded-2xl py-12 text-center text-muted-foreground text-xs">
               No pending deliveries left on route.
             </div>
           )}
@@ -1825,7 +1825,7 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
         </div>
 
         {/* Leaflet container */}
-        <div className="border border-primary/10 rounded-2xl overflow-hidden shadow-inner bg-[#FFF7EC] dark:bg-[#5A3019] relative z-0 h-[480px]">
+        <div className="border border-primary/10 rounded-2xl overflow-hidden shadow-inner bg-[#FFF7EC] dark:bg-[#482612] relative z-0 h-[480px]">
           <div ref={mapContainerRef} className="h-full w-full" />
         </div>
       </div>
@@ -1963,7 +1963,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
   };
 
   return (
-    <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
+    <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="font-serif text-xl font-bold flex items-center gap-2">
@@ -2010,7 +2010,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
 
       {/* Forms Section */}
       {showAddForm && (
-        <form onSubmit={handleCreate} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+        <form onSubmit={handleCreate} className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
           <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Create Staff Account
           </h3>
@@ -2024,7 +2024,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 onChange={(e) => setName(e.target.value)}
                 required
                 placeholder="e.g. John Doe"
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2036,7 +2036,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 placeholder="e.g. john@goldencrumb.com"
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2048,7 +2048,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder="Minimum 6 characters"
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2057,7 +2057,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 id="staff-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'admin' | 'kitchen' | 'courier')}
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
               >
                 <option value="admin">Admin (Full Control)</option>
                 <option value="kitchen">Kitchen (KDS View Only)</option>
@@ -2085,7 +2085,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
       )}
 
       {editingUser && (
-        <form onSubmit={handleUpdate} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+        <form onSubmit={handleUpdate} className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
           <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
             Edit Staff Account: {editingUser.name}
           </h3>
@@ -2098,7 +2098,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2109,7 +2109,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2123,7 +2123,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="New password (optional)"
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55] placeholder-muted-foreground/60"
               />
             </div>
             <div className="flex flex-col gap-1.5">
@@ -2132,7 +2132,7 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                 id="edit-role"
                 value={role}
                 onChange={(e) => setRole(e.target.value as 'admin' | 'kitchen' | 'courier')}
-                className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
               >
                 <option value="admin">Admin (Full Control)</option>
                 <option value="kitchen">Kitchen (KDS View Only)</option>
@@ -2160,11 +2160,11 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
       )}
 
       {/* Users Directory Table */}
-      <div className="border border-primary/5 rounded-2xl overflow-hidden shadow-sm bg-[#FFF7EC]/40 dark:bg-[#5A3019]/20">
+      <div className="border border-primary/5 rounded-2xl overflow-hidden shadow-sm bg-[#FFF7EC]/40 dark:bg-[#482612]/20">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse text-xs">
             <thead>
-              <tr className="bg-[#F8EBDD]/60 dark:bg-[#64371F]/40 border-b border-primary/5 font-semibold text-muted-foreground uppercase tracking-wider">
+              <tr className="bg-[#F8EBDD]/60 dark:bg-[#5A3019]/40 border-b border-primary/5 font-semibold text-muted-foreground uppercase tracking-wider">
                 <th className="py-3.5 px-4">Full Name</th>
                 <th className="py-3.5 px-4">Email</th>
                 <th className="py-3.5 px-4">System Role</th>
@@ -2259,7 +2259,7 @@ function renderMockTemplate(subject: string, body: string): string {
   const mockTable = `
     <table class="item-list" style="width: 100%; border-collapse: collapse; margin: 15px 0;">
       <thead>
-        <tr style="border-bottom: 2px solid #5A3019; text-align: left; background-color: #F8EBDD;">
+        <tr style="border-bottom: 2px solid #482612; text-align: left; background-color: #F8EBDD;">
           <th style="padding: 8px; font-size: 12px; text-transform: uppercase;">Cookie</th>
           <th style="padding: 8px; font-size: 12px; text-transform: uppercase; text-align: center;">Quantity</th>
           <th style="padding: 8px; font-size: 12px; text-transform: uppercase; text-align: right;">Total</th>
@@ -2322,7 +2322,7 @@ function renderMockTemplate(subject: string, body: string): string {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
           }
           .header {
-            background-color: #5A3019;
+            background-color: #482612;
             padding: 16px;
             text-align: center;
             border-bottom: 3px solid #D49A55;
@@ -2369,7 +2369,7 @@ function renderMockTemplate(subject: string, body: string): string {
             margin: 15px 0;
           }
           .item-list th {
-            border-bottom: 2px solid #5A3019;
+            border-bottom: 2px solid #482612;
             text-align: left;
             padding: 6px;
             font-size: 11px;
@@ -2596,7 +2596,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
   const previewHtml = renderMockTemplate(activeTemplate.subject, activeTemplate.body);
 
   return (
-    <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
+    <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="font-serif text-xl font-bold flex items-center gap-2">
@@ -2629,7 +2629,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         {/* Connection Configuration: Occupies left 2 columns */}
         <div className="lg:col-span-2 flex flex-col gap-6">
-          <form onSubmit={handleSave} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
+          <form onSubmit={handleSave} className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
             <div>
               <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
                 1. Delivery Method Settings
@@ -2650,7 +2650,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                     'p-3.5 rounded-xl border text-center font-bold text-xs capitalize transition-all flex flex-col items-center justify-center gap-1.5 shadow-sm active:scale-95',
                     provider === p
                       ? 'bg-[#D49A55] text-white border-transparent'
-                      : 'bg-[#FFF7EC] dark:bg-[#5A3019] border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-inherit'
+                      : 'bg-[#FFF7EC] dark:bg-[#482612] border-[#D49A55]/20 hover:bg-[#D49A55]/10 text-inherit'
                   )}
                 >
                   {p === 'mock' && <Code className="size-4" />}
@@ -2664,7 +2664,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
             </div>
 
             {/* Provider Instructions */}
-            <div className="text-[11px] bg-[#FFF7EC] dark:bg-[#5A3019] p-3 rounded-xl border border-[#D49A55]/10 italic text-[#4A2718]/80 dark:text-[#F7EADD]/80">
+            <div className="text-[11px] bg-[#FFF7EC] dark:bg-[#482612] p-3 rounded-xl border border-[#D49A55]/10 italic text-[#4A2718]/80 dark:text-[#F7EADD]/80">
               {provider === 'mock' && (
                 <p>
                   <strong>Mock Preview Mode:</strong> No actual emails will be sent. Dispatched emails will be saved locally inside <code>artifacts/mock-emails/</code> as HTML preview files for easy styling inspection.
@@ -2692,7 +2692,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   value={resendApiKey}
                   onChange={(e) => setResendApiKey(e.target.value)}
                   placeholder="re_123456789..."
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                 />
               </div>
             )}
@@ -2709,7 +2709,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                       value={smtpHost}
                       onChange={(e) => setSmtpHost(e.target.value)}
                       placeholder="smtp.example.com"
-                      className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                      className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
@@ -2720,7 +2720,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                       value={smtpPort}
                       onChange={(e) => setSmtpPort(Number(e.target.value))}
                       placeholder="587"
-                      className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                      className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                     />
                   </div>
                 </div>
@@ -2746,7 +2746,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                     value={smtpUser}
                     onChange={(e) => setSmtpUser(e.target.value)}
                     placeholder="user@example.com"
-                    className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                    className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                   />
                 </div>
 
@@ -2758,7 +2758,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                     value={smtpPass}
                     onChange={(e) => setSmtpPass(e.target.value)}
                     placeholder="••••••••••••••"
-                    className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                    className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                   />
                 </div>
               </div>
@@ -2775,7 +2775,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   onChange={(e) => setFromAddress(e.target.value)}
                   placeholder="Golden Crumb <orders@golden-crumb.com>"
                   required
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                 />
               </div>
 
@@ -2788,7 +2788,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   onChange={(e) => setAdminAddress(e.target.value)}
                   placeholder="admin@golden-crumb.com"
                   required
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
                 />
               </div>
             </div>
@@ -2814,7 +2814,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
           </form>
 
           {/* Test email module */}
-          <form onSubmit={handleSendTest} className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+          <form onSubmit={handleSendTest} className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
             <div>
               <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
                 2. Delivery Diagnostics
@@ -2834,7 +2834,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   onChange={(e) => setTestRecipient(e.target.value)}
                   placeholder="test@example.com"
                   required
-                  className="flex-1 bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55]"
+                  className="flex-1 bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55]"
                 />
                 <button
                   type="submit"
@@ -2850,7 +2850,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
 
         {/* Templates Customization Canvas: Occupies right 3 columns */}
         <div className="lg:col-span-3 flex flex-col gap-5">
-          <div className="bg-[#F8EBDD] dark:bg-[#64371F] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
+          <div className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-5">
             <div>
               <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground">
                 3. HTML Template Canvas
@@ -2868,7 +2868,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   id="active-template-select"
                   value={activeTemplateKey}
                   onChange={(e) => setActiveTemplateKey(e.target.value)}
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2.5 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-bold text-inherit"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2.5 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-bold text-inherit"
                 >
                   {templatesList.map((t) => (
                     <option key={t.key} value={t.key}>
@@ -2892,7 +2892,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                       [activeTemplateKey]: { ...prev[activeTemplateKey], subject: val },
                     }));
                   }}
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-semibold text-inherit"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-semibold text-inherit"
                 />
               </div>
             </div>
@@ -2916,7 +2916,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                       [activeTemplateKey]: { ...prev[activeTemplateKey], body: val },
                     }));
                   }}
-                  className="w-full bg-[#FFF7EC] dark:bg-[#5A3019] border border-[#D49A55]/20 rounded-xl p-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-mono leading-relaxed text-inherit"
+                  className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl p-3.5 text-xs focus:outline-none focus:border-[#D49A55] font-mono leading-relaxed text-inherit"
                 />
 
                 {/* Clickable Placeholders helper */}
@@ -2928,7 +2928,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                         key={ph}
                         type="button"
                         onClick={() => insertPlaceholder(ph)}
-                        className="px-2 py-1 bg-[#FFF7EC] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 border border-[#D49A55]/10 hover:border-[#D49A55]/30 rounded-lg text-[10px] font-mono font-semibold transition-all active:scale-95 text-inherit"
+                        className="px-2 py-1 bg-[#FFF7EC] dark:bg-[#482612] hover:bg-[#D49A55]/10 border border-[#D49A55]/10 hover:border-[#D49A55]/30 rounded-lg text-[10px] font-mono font-semibold transition-all active:scale-95 text-inherit"
                         title="Click to insert at cursor"
                       >
                         {`{{${ph}}}`}

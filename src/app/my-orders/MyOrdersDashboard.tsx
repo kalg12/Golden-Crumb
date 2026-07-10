@@ -277,7 +277,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
   return (
     <div className="flex flex-col gap-6 text-[#4A2718] dark:text-[#F7EADD]">
       {/* Header */}
-      <header className="flex items-center justify-between bg-[#FFF7EC] dark:bg-[#5A3019] p-4 sm:p-5 rounded-2xl border border-primary/10 shadow-sm">
+      <header className="flex items-center justify-between bg-[#FFF7EC] dark:bg-[#482612] p-4 sm:p-5 rounded-2xl border border-primary/10 shadow-sm">
         <div>
           <h1 className="font-serif text-xl sm:text-2xl font-bold tracking-tight">
             Hello, <span className="text-[#D49A55]">{customerName}</span>
@@ -295,7 +295,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
       </header>
 
       {initialOrders.length === 0 ? (
-        <div className="bg-[#FFF7EC] dark:bg-[#5A3019] border border-dashed border-primary/20 rounded-2xl py-16 px-4 text-center flex flex-col items-center gap-3">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] border border-dashed border-primary/20 rounded-2xl py-16 px-4 text-center flex flex-col items-center gap-3">
           <Package className="size-12 text-[#D49A55] opacity-60" />
           <p className="font-serif font-bold text-lg">No orders found</p>
           <p className="text-xs text-muted-foreground max-w-sm leading-relaxed">
@@ -327,7 +327,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
                       'text-left p-4 rounded-2xl border transition-all flex flex-col gap-2 shadow-sm',
                       isSelected
                         ? 'bg-[#D49A55]/15 border-[#D49A55]/40 shadow-inner'
-                        : 'bg-[#FFF7EC] border-primary/5 hover:bg-[#FFF7EC]/60 dark:bg-[#5A3019] dark:hover:bg-[#5A3019]/60'
+                        : 'bg-[#FFF7EC] border-primary/5 hover:bg-[#FFF7EC]/60 dark:bg-[#482612] dark:hover:bg-[#482612]/60'
                     )}
                   >
                     <div className="flex items-center justify-between w-full border-b border-primary/5 pb-1.5">
@@ -371,7 +371,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
           {selectedOrder && (
             <div className="lg:col-span-2 flex flex-col gap-6">
               {/* Order Status Stepper Card */}
-              <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
+              <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-6">
                 <div>
                   <h3 className="font-serif text-lg font-bold">
                     Order request #{selectedOrder._id.substring(selectedOrder._id.length - 8)}
@@ -410,7 +410,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
                                 ? 'bg-green-600 border-green-600 text-white'
                                 : isActive
                                 ? 'bg-[#D49A55] border-[#D49A55] text-white animate-pulse'
-                                : 'bg-[#F8EBDD] dark:bg-[#64371F] border-[#D49A55]/30 text-muted-foreground'
+                                : 'bg-[#F8EBDD] dark:bg-[#5A3019] border-[#D49A55]/30 text-muted-foreground'
                             )}
                           >
                             {isCompleted ? (
@@ -468,7 +468,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
                         <MapPin className="size-3.5" /> {selectedOrder.address.line1}
                       </p>
                       {selectedOrder.addressReference && (
-                        <p className="text-[10px] italic bg-[#F8EBDD] dark:bg-[#64371F] p-2 rounded-lg text-muted-foreground leading-normal mt-1 border border-primary/5">
+                        <p className="text-[10px] italic bg-[#F8EBDD] dark:bg-[#5A3019] p-2 rounded-lg text-muted-foreground leading-normal mt-1 border border-primary/5">
                           Landmark: {selectedOrder.addressReference}
                         </p>
                       )}
@@ -479,7 +479,7 @@ export function MyOrdersDashboard({ customerName, initialOrders }: MyOrdersDashb
 
               {/* Map view for active deliveries */}
               {selectedOrder.status !== 'cancelled' && (
-                <div className="bg-[#FFF7EC] dark:bg-[#5A3019] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
+                <div className="bg-[#FFF7EC] dark:bg-[#482612] p-6 rounded-2xl border border-primary/10 shadow-sm flex flex-col gap-4">
                   <div>
                     <h4 className="font-serif text-base font-bold flex items-center gap-2">
                       <MapPin className="size-4.5 text-[#D49A55]" /> Delivery Transit Route

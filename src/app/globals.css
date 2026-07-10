@@ -50,9 +50,9 @@
 }
 
 .dark {
-  --gc-bg: #482612;
-  --gc-surface: #5A3019;
-  --gc-card: #64371F;
+  --gc-bg: #3A1D10;
+  --gc-surface: #482612;
+  --gc-card: #5A3019;
   --gc-text: #F7EADD;
   --gc-text-secondary: #D7B895;
   --gc-text-muted: #D9B080;

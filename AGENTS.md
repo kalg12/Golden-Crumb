@@ -96,7 +96,7 @@ public/images/  -- Static assets
 ## Color system (Tailwind theme)
 
 **Light**: bg `#F0E0D0`, surface `#FFF7EC`, card `#F8EBDD`, text `#4A2718`, accent `#D49A55`
-**Dark**: bg `#482612`, surface `#5A3019`, card `#64371F`, text `#F7EADD`, accent `#D49A55`
+**Dark**: bg `#3A1D10`, surface `#482612`, card `#5A3019`, text `#F7EADD`, accent `#D49A55`
 No cold colors. Accent reserved for CTAs, prices, badges, highlights.
 
 ## Typography

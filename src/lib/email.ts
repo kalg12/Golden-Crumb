@@ -242,7 +242,7 @@ function getEmailBaseTemplate(title: string, bodyContent: string): string {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
           }
           .header {
-            background-color: #5A3019;
+            background-color: #482612;
             padding: 24px;
             text-align: center;
             border-bottom: 3px solid #D49A55;
@@ -288,7 +288,7 @@ function getEmailBaseTemplate(title: string, bodyContent: string): string {
             margin: 20px 0;
           }
           .item-list th {
-            border-bottom: 2px solid #5A3019;
+            border-bottom: 2px solid #482612;
             text-align: left;
             padding: 8px;
             font-size: 12px;
