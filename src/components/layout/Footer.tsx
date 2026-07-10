@@ -6,13 +6,13 @@ import { Separator } from '@/components/ui/separator';
 import {
   SITE_NAME,
   NAV_LINKS,
-  SOCIAL,
-  CONTACT,
   ALLERGEN_NOTICE,
 } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
-export function Footer() {
+export async function Footer() {
   const currentYear = new Date().getFullYear();
+  const settings = await getSiteSettings();
 
   return (
     <footer className="border-t border-border bg-card">
@@ -74,21 +74,21 @@ export function Footer() {
               Contact
             </h4>
             <ul className="flex flex-col gap-2.5 text-sm text-muted-foreground">
-              <li>{CONTACT.location}</li>
+              <li>{settings.location}</li>
               <li>
                 <a
-                  href={`mailto:${CONTACT.email}`}
+                  href={`mailto:${settings.contactEmail}`}
                   className="transition-colors hover:text-primary"
                 >
-                  {CONTACT.email}
+                  {settings.contactEmail}
                 </a>
               </li>
               <li>
                 <a
-                  href={`tel:${CONTACT.phone}`}
+                  href={`tel:${settings.contactPhone}`}
                   className="transition-colors hover:text-primary"
                 >
-                  {CONTACT.phone}
+                  {settings.contactPhone}
                 </a>
               </li>
             </ul>
@@ -102,7 +102,7 @@ export function Footer() {
             <ul className="flex flex-col gap-2.5 text-sm text-muted-foreground">
               <li>
                 <a
-                  href={SOCIAL.instagram}
+                  href={settings.instagramUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-primary"
@@ -112,7 +112,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href={SOCIAL.whatsapp}
+                  href={settings.whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="transition-colors hover:text-primary"

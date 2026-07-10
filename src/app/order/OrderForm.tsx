@@ -19,11 +19,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { SOCIAL } from "@/lib/constants";
 import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { createOrderAction } from "@/app/actions/dbActions";
 import { getCurrentSession } from "@/app/actions/authActions";
+import type { SiteContactSettings } from "@/lib/siteSettings";
 
 interface LeafletIcon {
   _leaflet_id?: number;
@@ -139,7 +139,11 @@ const disableDate = (date: Date) => {
   return !isWeekend(date);
 };
 
-export function OrderForm() {
+interface OrderFormProps {
+  settings: SiteContactSettings;
+}
+
+export function OrderForm({ settings }: OrderFormProps) {
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -436,7 +440,7 @@ export function OrderForm() {
               We&rsquo;ve received your request and will confirm it shortly. If
               you have urgent questions, reach out on{" "}
               <a
-                href={SOCIAL.whatsapp}
+                href={settings.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary hover:text-primary/80"
@@ -445,7 +449,7 @@ export function OrderForm() {
               </a>{" "}
               or{" "}
               <a
-                href={SOCIAL.instagram}
+                href={settings.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="font-medium text-primary hover:text-primary/80"
@@ -933,7 +937,7 @@ export function OrderForm() {
             Submit Order Request
           </Button>
           <Button variant="outline" size="lg" asChild>
-            <a href={SOCIAL.whatsapp} target="_blank" rel="noopener noreferrer">
+            <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer">
               Message on WhatsApp
             </a>
           </Button>

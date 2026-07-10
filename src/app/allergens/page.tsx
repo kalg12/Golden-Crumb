@@ -3,15 +3,18 @@ import type { Metadata } from 'next';
 import { Container } from '@/components/shared/Container';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { ALLERGEN_NOTICE, CONTACT } from '@/lib/constants';
+import { ALLERGEN_NOTICE } from '@/lib/constants';
 import { products } from '@/data/products';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export const metadata: Metadata = {
   title: 'Allergen Information — Golden Crumb',
   description: 'Detailed allergen information for all our artisan cookies.',
 };
 
-export default function AllergensPage() {
+export default async function AllergensPage() {
+  const settings = await getSiteSettings();
+
   return (
     <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <Container>
@@ -72,10 +75,10 @@ export default function AllergensPage() {
             <p className="mt-2 text-sm text-secondary-foreground">
               Contact us at{' '}
               <a
-                href={`mailto:${CONTACT.email}`}
+                href={`mailto:${settings.contactEmail}`}
                 className="font-medium text-primary transition-colors hover:text-primary/80"
               >
-                {CONTACT.email}
+                {settings.contactEmail}
               </a>{' '}
               and we&rsquo;ll be happy to help.
             </p>

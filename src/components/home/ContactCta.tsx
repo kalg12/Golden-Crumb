@@ -1,8 +1,10 @@
 import { Container } from '@/components/shared/Container';
 import { Button } from '@/components/ui/button';
-import { SOCIAL, CONTACT } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
-export function ContactCta() {
+export async function ContactCta() {
+  const settings = await getSiteSettings();
+
   return (
     <section className="py-14 sm:py-20 lg:py-24">
       <Container>
@@ -17,7 +19,7 @@ export function ContactCta() {
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button variant="outline" asChild>
               <a
-                href={SOCIAL.instagram}
+                href={settings.instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -26,7 +28,7 @@ export function ContactCta() {
             </Button>
             <Button asChild>
               <a
-                href={SOCIAL.whatsapp}
+                href={settings.whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -37,10 +39,10 @@ export function ContactCta() {
           <p className="mt-6 text-sm text-muted-foreground">
             Or email us at{' '}
             <a
-              href={`mailto:${CONTACT.email}`}
+              href={`mailto:${settings.contactEmail}`}
               className="font-medium text-primary transition-colors hover:text-primary/80"
             >
-              {CONTACT.email}
+              {settings.contactEmail}
             </a>
           </p>
         </div>

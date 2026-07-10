@@ -1,9 +1,11 @@
 import { Container } from '@/components/shared/Container';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { Card, CardContent } from '@/components/ui/card';
-import { CONTACT } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
-export function PickupDelivery() {
+export async function PickupDelivery() {
+  const settings = await getSiteSettings();
+
   return (
     <section className="py-14 sm:py-20 lg:py-24">
       <Container>
@@ -38,7 +40,7 @@ export function PickupDelivery() {
               <p className="mt-3 text-sm text-secondary-foreground">
                 Have questions?{' '}
                 <a
-                  href={`mailto:${CONTACT.email}`}
+                  href={`mailto:${settings.contactEmail}`}
                   className="font-medium text-primary transition-colors hover:text-primary/80"
                 >
                   Contact us

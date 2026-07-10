@@ -1,8 +1,10 @@
 import { Container } from '@/components/shared/Container';
 import { SectionHeader } from '@/components/shared/SectionHeader';
-import { CONTACT } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
-export function AboutSection() {
+export async function AboutSection() {
+  const settings = await getSiteSettings();
+
   return (
     <section className="py-14 sm:py-20 lg:py-24">
       <Container>
@@ -45,7 +47,7 @@ export function AboutSection() {
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-secondary-foreground">
               Our cookies may contain milk, eggs, wheat, soy, peanuts, or tree
-              nuts. Each product lists specific allergens. Email {CONTACT.email} for
+              nuts. Each product lists specific allergens. Email {settings.contactEmail} for
               detailed questions.
             </p>
           </article>

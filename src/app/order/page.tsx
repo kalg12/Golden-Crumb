@@ -4,6 +4,7 @@ import { Container } from '@/components/shared/Container';
 import { SectionHeader } from '@/components/shared/SectionHeader';
 import { OrderForm } from './OrderForm';
 import { SITE_URL } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export const metadata: Metadata = {
   title: 'Order',
@@ -17,7 +18,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function OrderPage() {
+export default async function OrderPage() {
+  const settings = await getSiteSettings();
+
   return (
     <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <Container>
@@ -26,7 +29,7 @@ export default function OrderPage() {
           title="Place an Order"
           subtitle="Fill out the form below and we&rsquo;ll confirm your order manually."
         />
-        <OrderForm />
+        <OrderForm settings={settings} />
       </Container>
     </main>
   );

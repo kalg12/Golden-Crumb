@@ -7,7 +7,8 @@ import { Footer } from '@/components/layout/Footer';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import './globals.css';
 import { cn } from '@/lib/utils';
-import { SITE_URL, SOCIAL, CONTACT } from '@/lib/constants';
+import { SITE_URL } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 const playfairDisplay = Playfair_Display({
   variable: '--font-serif-family',
@@ -70,11 +71,13 @@ const themeScript = `
   })();
 `;
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getSiteSettings();
+
   return (
     <html
       lang="en"
@@ -95,8 +98,8 @@ export default function RootLayout({
                 description:
                   'Freshly baked artisan cookies in San Francisco. Small-batch cookies for gifts, events, everyday treats, and sweet moments.',
                 url: SITE_URL,
-                telephone: CONTACT.phone,
-                email: CONTACT.email,
+                telephone: settings.contactPhone,
+                email: settings.contactEmail,
                 areaServed: 'San Francisco, CA',
                 servesCuisine: 'American',
                 address: {
@@ -105,7 +108,7 @@ export default function RootLayout({
                   addressRegion: 'CA',
                   addressCountry: 'US',
                 },
-                sameAs: [SOCIAL.instagram, SOCIAL.whatsapp],
+                sameAs: [settings.instagramUrl, settings.whatsappUrl],
                 logo: `${SITE_URL}/images/logos/GoldeCrumb-dark.png`,
               },
               {

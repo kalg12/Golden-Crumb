@@ -52,6 +52,8 @@ import {
   sendTestEmailAction,
   resetEmailSettingsAction,
 } from '@/app/actions/emailActions';
+import { updateSiteSettingsAction } from '@/app/actions/settingsActions';
+import type { SiteContactSettings } from '@/lib/siteSettings';
 
 interface OrderItem {
   productId: string;
@@ -145,6 +147,7 @@ interface AdminDashboardProps {
   };
   initialStaffUsers: StaffUser[];
   initialEmailSettings: any;
+  initialSiteSettings: SiteContactSettings;
   initialTab?: string;
 }
 
@@ -177,15 +180,16 @@ export function AdminDashboard({
   currentUser,
   initialStaffUsers,
   initialEmailSettings,
+  initialSiteSettings,
   initialTab,
 }: AdminDashboardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Roles toggler: admin, kitchen, courier, staff, email_settings
-  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings'>(() => {
-    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings'];
+  // Roles toggler: admin, kitchen, courier, staff, email_settings, site_settings
+  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings'>(() => {
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings'];
     if (initialTab && validTabs.includes(initialTab)) {
       if (currentUser.role === 'admin' || initialTab === currentUser.role) {
         return initialTab as any;
@@ -197,7 +201,7 @@ export function AdminDashboard({
   // Sync state if URL search param 'tab' changes (e.g. browser back/forward buttons)
   useEffect(() => {
     const tab = searchParams.get('tab');
-    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings'];
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings'];
     if (tab && validTabs.includes(tab)) {
       if (currentUser.role === 'admin' || tab === currentUser.role) {
         setActiveRole(tab as any);
@@ -216,7 +220,7 @@ export function AdminDashboard({
   }, [router, pathname, currentUser.role]);
 
   // Update tab in state and URL search params
-  const handleTabChange = (tab: 'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings') => {
+  const handleTabChange = (tab: 'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings') => {
     setActiveRole(tab);
     const params = new URLSearchParams(window.location.search);
     params.set('tab', tab);
@@ -447,6 +451,17 @@ export function AdminDashboard({
               >
                 <Mail className="size-4" /> Email Config
               </button>
+              <button
+                onClick={() => handleTabChange('site_settings')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'site_settings'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <Settings className="size-4" /> Site Settings
+              </button>
             </>
           ) : (
             <div className="px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 text-xs font-bold capitalize flex items-center gap-1.5">
@@ -527,6 +542,12 @@ export function AdminDashboard({
       {activeRole === 'email_settings' && currentUser.role === 'admin' && (
         <EmailSettingsView
           initialSettings={initialEmailSettings}
+        />
+      )}
+
+      {activeRole === 'site_settings' && currentUser.role === 'admin' && (
+        <SiteSettingsView
+          initialSettings={initialSiteSettings}
         />
       )}
 
@@ -2960,6 +2981,148 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SUB-COMPONENT: SITE SETTINGS VIEW
+   ========================================================================== */
+interface SiteSettingsViewProps {
+  initialSettings: SiteContactSettings;
+}
+
+function SiteSettingsView({ initialSettings }: SiteSettingsViewProps) {
+  const [contactEmail, setContactEmail] = useState(initialSettings.contactEmail);
+  const [contactPhone, setContactPhone] = useState(initialSettings.contactPhone);
+  const [location, setLocation] = useState(initialSettings.location);
+  const [instagramUrl, setInstagramUrl] = useState(initialSettings.instagramUrl);
+  const [whatsappUrl, setWhatsappUrl] = useState(initialSettings.whatsappUrl);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFeedback(null);
+    setLoading(true);
+
+    try {
+      const res = await updateSiteSettingsAction({
+        contactEmail,
+        contactPhone,
+        location,
+        instagramUrl,
+        whatsappUrl,
+      });
+      if (res.success) {
+        setFeedback({ type: 'success', message: 'Site contact information updated. Changes go live across the site immediately.' });
+      } else {
+        setFeedback({ type: 'error', message: res.error || 'Failed to save site settings.' });
+      }
+    } catch (err) {
+      console.error(err);
+      setFeedback({ type: 'error', message: 'An unexpected error occurred while saving.' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-5 max-w-2xl">
+      <div>
+        <h2 className="font-serif text-xl font-bold">Site Settings</h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Update the contact details and social links shown across the public site (footer, contact section, FAQ, order page) without touching code.
+        </p>
+      </div>
+
+      {feedback && (
+        <div
+          className={cn(
+            'p-3 rounded-xl text-xs font-semibold border',
+            feedback.type === 'success'
+              ? 'bg-green-500/10 border-green-500/20 text-green-700 dark:text-green-400'
+              : 'bg-red-500/10 border-red-500/20 text-red-600'
+          )}
+        >
+          {feedback.message}
+        </div>
+      )}
+
+      <form onSubmit={handleSave} className="bg-[#F8EBDD] dark:bg-[#5A3019] p-5 rounded-2xl border border-primary/5 flex flex-col gap-4">
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="contact-email" className="text-xs font-semibold text-muted-foreground">Contact Email</label>
+          <input
+            id="contact-email"
+            type="email"
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
+            placeholder="hello@goldencrumb.com"
+            required
+            className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="contact-phone" className="text-xs font-semibold text-muted-foreground">Contact Phone</label>
+          <input
+            id="contact-phone"
+            type="text"
+            value={contactPhone}
+            onChange={(e) => setContactPhone(e.target.value)}
+            placeholder="(415) 555-0100"
+            required
+            className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="location" className="text-xs font-semibold text-muted-foreground">Location</label>
+          <input
+            id="location"
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="San Francisco, CA"
+            required
+            className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="instagram-url" className="text-xs font-semibold text-muted-foreground">Instagram URL</label>
+          <input
+            id="instagram-url"
+            type="url"
+            value={instagramUrl}
+            onChange={(e) => setInstagramUrl(e.target.value)}
+            placeholder="https://instagram.com/goldencrumb"
+            required
+            className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+          />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor="whatsapp-url" className="text-xs font-semibold text-muted-foreground">WhatsApp Link</label>
+          <input
+            id="whatsapp-url"
+            type="url"
+            value={whatsappUrl}
+            onChange={(e) => setWhatsappUrl(e.target.value)}
+            placeholder="https://wa.me/14155550100"
+            required
+            className="w-full bg-[#FFF7EC] dark:bg-[#482612] border border-[#D49A55]/20 rounded-xl py-2 px-3.5 text-sm focus:outline-none focus:border-[#D49A55]"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+        >
+          {loading ? 'Saving...' : 'Save Site Settings'}
+        </button>
+      </form>
     </div>
   );
 }

@@ -9,7 +9,8 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Card, CardContent } from '@/components/ui/card';
-import { SOCIAL, CONTACT, SITE_URL } from '@/lib/constants';
+import { SITE_URL } from '@/lib/constants';
+import { getSiteSettings } from '@/lib/siteSettings';
 
 export const metadata: Metadata = {
   title: 'FAQ',
@@ -99,7 +100,9 @@ const faqSchema = {
   })),
 };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const settings = await getSiteSettings();
+
   return (
     <main className="flex-1 py-14 sm:py-20 lg:py-24">
       <script
@@ -134,7 +137,7 @@ export default function FaqPage() {
           <p className="mt-2 text-sm text-secondary-foreground">
             Reach out on{' '}
             <a
-              href={SOCIAL.instagram}
+              href={settings.instagramUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-primary transition-colors hover:text-primary/80"
@@ -143,7 +146,7 @@ export default function FaqPage() {
             </a>
             ,{' '}
             <a
-              href={SOCIAL.whatsapp}
+              href={settings.whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-primary transition-colors hover:text-primary/80"
@@ -152,10 +155,10 @@ export default function FaqPage() {
             </a>
             , or email us at{' '}
             <a
-              href={`mailto:${CONTACT.email}`}
+              href={`mailto:${settings.contactEmail}`}
               className="font-medium text-primary transition-colors hover:text-primary/80"
             >
-              {CONTACT.email}
+              {settings.contactEmail}
             </a>
             .
           </p>

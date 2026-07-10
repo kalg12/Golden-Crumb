@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { EmailSettings } from '@/models/EmailSettings';
+import { getSiteSettings } from '@/lib/siteSettings';
 export const DEFAULT_TEMPLATES = {
   customerConfirmation: {
     subject: '🍪 Order Confirmation #{{orderId}} - Golden Crumb',
@@ -216,7 +217,8 @@ export async function sendEmail({ to, subject, html }: EmailPayload): Promise<bo
 /**
  * Template Helper: Custom styles wrapper for emails.
  */
-function getEmailBaseTemplate(title: string, bodyContent: string): string {
+async function getEmailBaseTemplate(title: string, bodyContent: string): Promise<string> {
+  const siteSettings = await getSiteSettings();
   return `
     <!DOCTYPE html>
     <html>
@@ -317,8 +319,8 @@ function getEmailBaseTemplate(title: string, bodyContent: string): string {
             ${bodyContent}
           </div>
           <div class="footer">
-            <p>Golden Crumb · Artisan Cookies · San Francisco, CA</p>
-            <p>Questions? Contact us on <a href="https://wa.me/15551234567">WhatsApp</a></p>
+            <p>Golden Crumb · Artisan Cookies · ${siteSettings.location}</p>
+            <p>Questions? Contact us on <a href="${siteSettings.whatsappUrl}">WhatsApp</a></p>
           </div>
         </div>
       </body>
@@ -390,7 +392,7 @@ export async function sendOrderConfirmationEmail(order: {
   const custTemplate = settings?.templates?.customerConfirmation || DEFAULT_TEMPLATES.customerConfirmation;
   const custSubject = replacePlaceholders(custTemplate.subject, variables);
   const custBody = replacePlaceholders(custTemplate.body, variables);
-  const customerHtml = getEmailBaseTemplate(custSubject, custBody);
+  const customerHtml = await getEmailBaseTemplate(custSubject, custBody);
 
   await sendEmail({
     to: order.customerEmail,
@@ -402,7 +404,7 @@ export async function sendOrderConfirmationEmail(order: {
   const adminTemplate = settings?.templates?.adminConfirmation || DEFAULT_TEMPLATES.adminConfirmation;
   const adminSubject = replacePlaceholders(adminTemplate.subject, variables);
   const adminBody = replacePlaceholders(adminTemplate.body, variables);
-  const adminHtml = getEmailBaseTemplate(adminSubject, adminBody);
+  const adminHtml = await getEmailBaseTemplate(adminSubject, adminBody);
 
   const adminEmailRecipient = settings?.adminAddress || 'admin@golden-crumb.com';
 
@@ -480,7 +482,7 @@ export async function sendOrderStatusUpdateEmail(order: {
 
   const subject = replacePlaceholders(templateConfig.subject, variables);
   const body = replacePlaceholders(templateConfig.body, variables);
-  const html = getEmailBaseTemplate(subject, body);
+  const html = await getEmailBaseTemplate(subject, body);
 
   await sendEmail({
     to: order.customerEmail,
