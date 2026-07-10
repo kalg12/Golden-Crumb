@@ -31,6 +31,8 @@ import {
   Eye,
   Code,
   Loader2,
+  Star,
+  MessageSquareHeart,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -54,6 +56,7 @@ import {
   resetEmailSettingsAction,
 } from '@/app/actions/emailActions';
 import { updateSiteSettingsAction } from '@/app/actions/settingsActions';
+import { sendSurveysAction, type SurveyResponseData } from '@/app/actions/surveyActions';
 import type { SiteContactSettings } from '@/lib/siteSettings';
 
 interface OrderItem {
@@ -97,6 +100,7 @@ export interface OrderData {
   prepStartedAt?: string | null;
   prepCompletedAt?: string | null;
   prepDuration?: number;
+  surveySentAt?: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -149,6 +153,7 @@ interface AdminDashboardProps {
   initialStaffUsers: StaffUser[];
   initialEmailSettings: any;
   initialSiteSettings: SiteContactSettings;
+  initialSurveys: SurveyResponseData[];
   initialTab?: string;
 }
 
@@ -182,6 +187,7 @@ export function AdminDashboard({
   initialStaffUsers,
   initialEmailSettings,
   initialSiteSettings,
+  initialSurveys,
   initialTab,
 }: AdminDashboardProps) {
   const router = useRouter();
@@ -189,8 +195,8 @@ export function AdminDashboard({
   const pathname = usePathname();
 
   // Roles toggler: admin, kitchen, courier, staff, email_settings, site_settings
-  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings'>(() => {
-    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings'];
+  const [activeRole, setActiveRole] = useState<'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings' | 'feedback'>(() => {
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings', 'feedback'];
     if (initialTab && validTabs.includes(initialTab)) {
       if (currentUser.role === 'admin' || initialTab === currentUser.role) {
         return initialTab as any;
@@ -202,7 +208,7 @@ export function AdminDashboard({
   // Sync state if URL search param 'tab' changes (e.g. browser back/forward buttons)
   useEffect(() => {
     const tab = searchParams.get('tab');
-    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings'];
+    const validTabs = ['admin', 'kitchen', 'courier', 'staff', 'email_settings', 'site_settings', 'feedback'];
     if (tab && validTabs.includes(tab)) {
       if (currentUser.role === 'admin' || tab === currentUser.role) {
         setActiveRole(tab as any);
@@ -221,7 +227,7 @@ export function AdminDashboard({
   }, [router, pathname, currentUser.role]);
 
   // Update tab in state and URL search params
-  const handleTabChange = (tab: 'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings') => {
+  const handleTabChange = (tab: 'admin' | 'kitchen' | 'courier' | 'staff' | 'email_settings' | 'site_settings' | 'feedback') => {
     setActiveRole(tab);
     const params = new URLSearchParams(window.location.search);
     params.set('tab', tab);
@@ -468,6 +474,17 @@ export function AdminDashboard({
               >
                 <Settings className="size-4" /> Site Settings
               </button>
+              <button
+                onClick={() => handleTabChange('feedback')}
+                className={cn(
+                  'px-4 py-2 text-xs font-semibold rounded-xl transition-all flex items-center gap-1.5 shadow-sm',
+                  activeRole === 'feedback'
+                    ? 'bg-[#D49A55] text-[#FFF7EC]'
+                    : 'bg-[#F8EBDD] dark:bg-[#5A3019] hover:bg-[#D49A55]/10 text-inherit border border-[#D49A55]/20'
+                )}
+              >
+                <MessageSquareHeart className="size-4" /> Feedback
+              </button>
             </>
           ) : (
             <div className="px-3 py-1.5 rounded-xl border border-primary/10 bg-primary/5 text-xs font-bold capitalize flex items-center gap-1.5">
@@ -520,6 +537,7 @@ export function AdminDashboard({
           setStatusFilter={setStatusFilter}
           onUpdateStatus={handleUpdateStatus}
           updatingOrderId={updatingOrderId}
+          onRefresh={refreshData}
         />
       )}
 
@@ -558,6 +576,10 @@ export function AdminDashboard({
         <SiteSettingsView
           initialSettings={initialSiteSettings}
         />
+      )}
+
+      {activeRole === 'feedback' && currentUser.role === 'admin' && (
+        <FeedbackView initialSurveys={initialSurveys} />
       )}
 
       {/* Shipping Label Preview Modal */}
@@ -599,6 +621,7 @@ interface AdminViewProps {
   setStatusFilter: (s: string) => void;
   onUpdateStatus: (id: string, s: string) => void;
   updatingOrderId: string | null;
+  onRefresh: () => Promise<void>;
 }
 
 function AdminView({
@@ -618,11 +641,44 @@ function AdminView({
   setStatusFilter,
   onUpdateStatus,
   updatingOrderId,
+  onRefresh,
 }: AdminViewProps) {
   // SVG Sales Chart layout parameters
   const chartHeight = 160;
   const chartWidth = 500;
   const padding = 30;
+
+  // Survey selection & sending state
+  const [selectedOrderIds, setSelectedOrderIds] = useState<string[]>([]);
+  const [sendingSurveys, setSendingSurveys] = useState(false);
+  const [surveyFeedback, setSurveyFeedback] = useState<string | null>(null);
+
+  const toggleOrderSelected = (orderId: string) => {
+    setSelectedOrderIds((prev) =>
+      prev.includes(orderId) ? prev.filter((id) => id !== orderId) : [...prev, orderId]
+    );
+  };
+
+  const handleSendSurveys = async (orderIds: string[]) => {
+    if (orderIds.length === 0 || sendingSurveys) return;
+    setSendingSurveys(true);
+    setSurveyFeedback(null);
+    try {
+      const res = await sendSurveysAction(orderIds);
+      if (res.success) {
+        setSurveyFeedback(`Survey sent to ${res.sent} customer${res.sent === 1 ? '' : 's'}.`);
+        setSelectedOrderIds([]);
+        await onRefresh();
+      } else {
+        setSurveyFeedback(res.error || 'Failed to send surveys.');
+      }
+    } catch (err) {
+      console.error(err);
+      setSurveyFeedback('An unexpected error occurred while sending surveys.');
+    } finally {
+      setSendingSurveys(false);
+    }
+  };
 
   const points = useMemo(() => {
     if (history.length === 0) return '';
@@ -864,11 +920,34 @@ function AdminView({
               />
             </div>
 
+            {/* Survey bulk-send toolbar */}
+            {(selectedOrderIds.length > 0 || surveyFeedback) && (
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#D49A55]/20 bg-[#D49A55]/5 px-4 py-2.5">
+                <p className="text-xs font-medium text-inherit">
+                  {surveyFeedback
+                    ? surveyFeedback
+                    : `${selectedOrderIds.length} delivered order${selectedOrderIds.length === 1 ? '' : 's'} selected`}
+                </p>
+                {selectedOrderIds.length > 0 && (
+                  <button
+                    type="button"
+                    disabled={sendingSurveys}
+                    onClick={() => handleSendSurveys(selectedOrderIds)}
+                    className="px-3 py-1.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
+                  >
+                    {sendingSurveys && <Loader2 className="size-3.5 animate-spin" />}
+                    {sendingSurveys ? 'Sending...' : 'Send Satisfaction Survey'}
+                  </button>
+                )}
+              </div>
+            )}
+
             {/* Table layout for desktop, list for mobile */}
             <div className="overflow-x-auto border border-primary/10 rounded-xl bg-[#F8EBDD]/20">
               <table className="w-full text-left text-xs border-collapse">
                 <thead>
                   <tr className="bg-[#F8EBDD] dark:bg-[#5A3019] border-b border-primary/10 text-muted-foreground font-semibold">
+                    <th className="p-3 w-8"></th>
                     <th className="p-3">Order ID</th>
                     <th className="p-3">Customer</th>
                     <th className="p-3">Items</th>
@@ -881,6 +960,17 @@ function AdminView({
                   {filteredOrders.length > 0 ? (
                     filteredOrders.map((o) => (
                       <tr key={o._id} className="hover:bg-[#D49A55]/5 transition-colors">
+                        <td className="p-3">
+                          {o.status === 'delivered' && (
+                            <input
+                              type="checkbox"
+                              checked={selectedOrderIds.includes(o._id)}
+                              onChange={() => toggleOrderSelected(o._id)}
+                              aria-label={`Select order ${o._id} for survey`}
+                              className="size-3.5 accent-[#D49A55]"
+                            />
+                          )}
+                        </td>
                         <td className="p-3 font-mono font-bold text-[10px] text-muted-foreground">
                           {o._id.substring(o._id.length - 6)}
                         </td>
@@ -943,6 +1033,24 @@ function AdminView({
                               <span className="px-2.5 py-1.5 bg-green-500/10 text-green-600 font-semibold rounded-lg text-[10px] flex items-center gap-1">
                                 <CheckCircle className="size-3" /> Delivered
                               </span>
+                            )}
+                            {o.status === 'delivered' && (
+                              o.surveySentAt ? (
+                                <span
+                                  className="px-2.5 py-1.5 bg-[#D49A55]/10 text-[#D49A55] font-semibold rounded-lg text-[10px] flex items-center gap-1"
+                                  title={`Sent ${new Date(o.surveySentAt).toLocaleDateString()}`}
+                                >
+                                  <Star className="size-3" /> Survey Sent
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => handleSendSurveys([o._id])}
+                                  disabled={sendingSurveys}
+                                  className="px-2.5 py-1.5 border border-[#D49A55]/30 hover:bg-[#D49A55]/10 text-[#D49A55] font-semibold rounded-lg text-[10px] transition-all disabled:opacity-50 flex items-center gap-1"
+                                >
+                                  <Star className="size-3" /> Send Survey
+                                </button>
+                              )
                             )}
                             {o.status === 'cancelled' && (
                               <span className="px-2.5 py-1.5 bg-red-500/10 text-red-600 font-semibold rounded-lg text-[10px]">
@@ -2355,6 +2463,7 @@ function renderMockTemplate(subject: string, body: string): string {
     adminUrl: '#',
     statusTitle: 'Baking in Progress',
     statusDescription: 'Your artisan cookies have entered the kitchen prep stage and are now being freshly rolled and baked by our team.',
+    surveyUrl: '#',
   };
 
   let renderedBody = body;
@@ -2496,6 +2605,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
       statusOutForDelivery: { subject: '', body: '' },
       statusDelivered: { subject: '', body: '' },
       statusCancelled: { subject: '', body: '' },
+      satisfactionSurvey: { subject: '', body: '' },
     };
     if (initialSettings?.templates) {
       return { ...defaults, ...initialSettings.templates };
@@ -2518,6 +2628,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
     { key: 'statusOutForDelivery', label: 'Status: Out for Delivery' },
     { key: 'statusDelivered', label: 'Status: Delivered' },
     { key: 'statusCancelled', label: 'Status: Cancelled' },
+    { key: 'satisfactionSurvey', label: 'Satisfaction Survey' },
   ];
 
   // Map of placeholders by template
@@ -2534,6 +2645,9 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
         'deliveryAddress',
         key === 'customerConfirmation' ? 'trackingUrl' : 'adminUrl',
       ];
+    }
+    if (key === 'satisfactionSurvey') {
+      return ['orderId', 'customerName', 'customerEmail', 'surveyUrl'];
     }
     return [
       'orderId',
@@ -3167,6 +3281,112 @@ function SiteSettingsView({ initialSettings }: SiteSettingsViewProps) {
           {loading ? 'Saving...' : 'Save Site Settings'}
         </button>
       </form>
+    </div>
+  );
+}
+
+/* ==========================================================================
+   SUB-COMPONENT: FEEDBACK / CUSTOMER SATISFACTION VIEW
+   ========================================================================== */
+interface FeedbackViewProps {
+  initialSurveys: SurveyResponseData[];
+}
+
+function FeedbackView({ initialSurveys }: FeedbackViewProps) {
+  const responded = initialSurveys.filter((s) => s.respondedAt);
+  const averageRating =
+    responded.length > 0
+      ? responded.reduce((sum, s) => sum + (s.rating || 0), 0) / responded.length
+      : null;
+
+  return (
+    <div className="flex flex-col gap-6">
+      <div>
+        <h2 className="font-serif text-xl font-bold flex items-center gap-2">
+          <MessageSquareHeart className="size-5 text-[#D49A55]" /> Customer Satisfaction
+        </h2>
+        <p className="text-xs text-muted-foreground mt-0.5">
+          Send a satisfaction survey after delivery from the Admin Dashboard order queue,
+          then track responses here.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Average Rating</p>
+          <div className="mt-2 flex items-center gap-2">
+            <span className="text-2xl font-bold text-foreground">
+              {averageRating !== null ? averageRating.toFixed(1) : '—'}
+            </span>
+            {averageRating !== null && (
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((v) => (
+                  <Star
+                    key={v}
+                    className={cn(
+                      'size-4',
+                      v <= Math.round(averageRating) ? 'fill-[#D49A55] text-[#D49A55]' : 'fill-none text-muted-foreground/30'
+                    )}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Responses</p>
+          <p className="mt-2 text-2xl font-bold text-foreground">{responded.length}</p>
+        </div>
+        <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm">
+          <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider">Surveys Sent</p>
+          <p className="mt-2 text-2xl font-bold text-foreground">{initialSurveys.length}</p>
+        </div>
+      </div>
+
+      <div className="bg-[#FFF7EC] dark:bg-[#482612] p-5 rounded-2xl border border-primary/10 shadow-sm">
+        <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-muted-foreground mb-4">
+          Responses
+        </h3>
+        {responded.length === 0 ? (
+          <div className="bg-[#F8EBDD]/40 dark:bg-[#5A3019]/20 border border-dashed border-primary/10 rounded-2xl py-12 text-center text-muted-foreground text-xs italic">
+            No feedback yet. Sent surveys will show up here once customers respond.
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {responded.map((s) => (
+              <div
+                key={s._id}
+                className="bg-[#F8EBDD] dark:bg-[#5A3019] p-4 rounded-2xl border border-primary/5 flex flex-col gap-2"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="font-semibold text-sm">{s.customerName}</span>
+                  <div className="flex shrink-0">
+                    {[1, 2, 3, 4, 5].map((v) => (
+                      <Star
+                        key={v}
+                        className={cn(
+                          'size-3.5',
+                          v <= (s.rating || 0) ? 'fill-[#D49A55] text-[#D49A55]' : 'fill-none text-muted-foreground/30'
+                        )}
+                      />
+                    ))}
+                  </div>
+                </div>
+                {s.feedback && (
+                  <p className="text-xs text-muted-foreground leading-relaxed">{s.feedback}</p>
+                )}
+                <span className="text-[10px] text-muted-foreground/70">
+                  {s.respondedAt && new Date(s.respondedAt).toLocaleDateString(undefined, {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                  })}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

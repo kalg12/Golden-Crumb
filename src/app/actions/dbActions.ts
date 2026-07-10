@@ -404,6 +404,7 @@ export async function getDashboardData() {
       updatedAt: o.updatedAt.toISOString(),
       prepStartedAt: o.prepStartedAt ? o.prepStartedAt.toISOString() : null,
       prepCompletedAt: o.prepCompletedAt ? o.prepCompletedAt.toISOString() : null,
+      surveySentAt: o.surveySentAt ? o.surveySentAt.toISOString() : null,
     }));
 
     const serializedCustomers = customers.map((c) => ({

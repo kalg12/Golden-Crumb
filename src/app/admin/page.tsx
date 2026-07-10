@@ -2,6 +2,7 @@ import { AdminDashboard, OrderData, CustomerData, RouteStop } from './AdminDashb
 import { getDashboardData, getTodayDeliveries } from '@/app/actions/dbActions';
 import { getCurrentSession } from '@/app/actions/authActions';
 import { getEmailSettingsAction } from '@/app/actions/emailActions';
+import { getSurveyResponsesAction } from '@/app/actions/surveyActions';
 import { getSiteSettings } from '@/lib/siteSettings';
 import { connectToDatabase } from '@/lib/db';
 import { User } from '@/models/User';
@@ -19,6 +20,8 @@ export default async function AdminPage(props: {
   const deliveryResult = await getTodayDeliveries();
   const emailSettingsResult = await getEmailSettingsAction();
   const initialSiteSettings = await getSiteSettings();
+  const surveysResult = await getSurveyResponsesAction();
+  const initialSurveys = surveysResult.success && surveysResult.surveys ? surveysResult.surveys : [];
 
   const initialStats = (dashboardResult.success && dashboardResult.stats)
     ? dashboardResult.stats
@@ -69,6 +72,7 @@ export default async function AdminPage(props: {
           initialStaffUsers={initialStaffUsers}
           initialEmailSettings={initialEmailSettings}
           initialSiteSettings={initialSiteSettings}
+          initialSurveys={initialSurveys}
           initialTab={initialTab}
         />
       </div>

@@ -23,6 +23,7 @@ export interface IEmailSettings {
     statusOutForDelivery: IEmailTemplate;
     statusDelivered: IEmailTemplate;
     statusCancelled: IEmailTemplate;
+    satisfactionSurvey: IEmailTemplate;
   };
   createdAt: Date;
   updatedAt: Date;
@@ -83,6 +84,10 @@ const EmailSettingsSchema = new Schema<IEmailSettings>(
         required: true,
       },
       statusCancelled: {
+        type: EmailTemplateSchema,
+        required: true,
+      },
+      satisfactionSurvey: {
         type: EmailTemplateSchema,
         required: true,
       },

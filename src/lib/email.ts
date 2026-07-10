@@ -97,6 +97,15 @@ export const DEFAULT_TEMPLATES = {
 </div>
 <p>If you have any questions, contact us on WhatsApp.</p>`,
   },
+  satisfactionSurvey: {
+    subject: '🍪 How did we do? Order #{{orderId}}',
+    body: `<h2>Thanks for baking with us, {{customerName}}!</h2>
+<p>Your order <strong>#{{orderId}}</strong> was delivered and we&rsquo;d love to know how it went. It only takes a minute.</p>
+<div style="text-align: center;">
+  <a href="{{surveyUrl}}" class="button">Share Your Feedback</a>
+</div>
+<p style="font-size: 12px; color: #8A5D3B;">Your feedback helps us keep improving every batch.</p>`,
+  },
 };
 
 interface EmailPayload {
@@ -486,6 +495,43 @@ export async function sendOrderStatusUpdateEmail(order: {
   const html = await getEmailBaseTemplate(subject, body);
 
   await sendEmail({
+    to: order.customerEmail,
+    subject,
+    html,
+  });
+}
+
+/**
+ * Triggers a post-delivery customer satisfaction survey invite.
+ */
+export async function sendSurveyEmail(order: {
+  _id: string;
+  customerName: string;
+  customerEmail: string;
+  surveyToken: string;
+}) {
+  let settings = null;
+  try {
+    settings = await EmailSettings.findOne({});
+  } catch (err) {
+    console.warn('Could not read email settings:', err);
+  }
+
+  const orderIdShort = order._id.substring(order._id.length - 6);
+  const templateConfig = settings?.templates?.satisfactionSurvey || DEFAULT_TEMPLATES.satisfactionSurvey;
+
+  const variables = {
+    orderId: orderIdShort,
+    customerName: order.customerName,
+    customerEmail: order.customerEmail,
+    surveyUrl: `${getBaseUrl()}/survey/${order.surveyToken}`,
+  };
+
+  const subject = replacePlaceholders(templateConfig.subject, variables);
+  const body = replacePlaceholders(templateConfig.body, variables);
+  const html = await getEmailBaseTemplate(subject, body);
+
+  return sendEmail({
     to: order.customerEmail,
     subject,
     html,

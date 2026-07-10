@@ -38,6 +38,7 @@ export interface IOrder {
   prepStartedAt?: Date;
   prepCompletedAt?: Date;
   prepDuration?: number; // duration in seconds
+  surveySentAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -87,6 +88,7 @@ const OrderSchema = new Schema<IOrder>(
     prepStartedAt: { type: Date },
     prepCompletedAt: { type: Date },
     prepDuration: { type: Number },
+    surveySentAt: { type: Date },
   },
   { timestamps: true }
 );
