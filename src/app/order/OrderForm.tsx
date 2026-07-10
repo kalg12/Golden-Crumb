@@ -619,16 +619,18 @@ export function OrderForm({ settings }: OrderFormProps) {
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal px-3 py-2 h-10 border border-input rounded-md bg-background text-sm",
+                        "w-full justify-start text-left font-normal",
                         !form.preferredDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {form.preferredDate ? (
-                        format(parseISO(form.preferredDate), "PPP")
-                      ) : (
-                        <span>Select delivery date</span>
-                      )}
+                      <CalendarIcon className="mr-1.5 size-4 shrink-0 text-muted-foreground" />
+                      <span className="truncate">
+                        {form.preferredDate ? (
+                          format(parseISO(form.preferredDate), "PPP")
+                        ) : (
+                          "Select delivery date"
+                        )}
+                      </span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">

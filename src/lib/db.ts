@@ -29,7 +29,9 @@ if (!cached) {
 export async function connectToDatabase(): Promise<typeof mongoose> {
   if (!MONGODB_URI) {
     throw new Error(
-      'Please define the MONGODB_URI environment variable inside .env.local'
+      'MONGODB_URI is not set for this environment. Locally, define it in .env.local; ' +
+      'on Vercel, add it under Project Settings > Environment Variables and redeploy ' +
+      '(adding the variable does not affect deployments already built).'
     );
   }
 
