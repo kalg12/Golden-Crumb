@@ -23,10 +23,19 @@ export async function loginAction(
 
     // 1. Staff authentication pathway
     if (isStaff) {
-      // Bootstrap default admin if empty
-      if (normEmail === 'admin@golden-crumb.com' && password === 'admin123') {
-        const adminExists = await User.findOne({ email: normEmail });
-        if (!adminExists) {
+      // Bootstrap the first admin from env-configured credentials, only while
+      // no staff users exist yet. Prevents a guessable hardcoded account.
+      const bootstrapEmail = process.env.ADMIN_BOOTSTRAP_EMAIL?.trim().toLowerCase();
+      const bootstrapPassword = process.env.ADMIN_BOOTSTRAP_PASSWORD;
+
+      if (
+        bootstrapEmail &&
+        bootstrapPassword &&
+        normEmail === bootstrapEmail &&
+        password === bootstrapPassword
+      ) {
+        const userCount = await User.countDocuments({});
+        if (userCount === 0) {
           const passHash = await hashPassword(password);
           const defaultAdmin = new User({
             name: 'Bakery Admin',

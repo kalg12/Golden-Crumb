@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { Playfair_Display, Geist } from 'next/font/google';
+import { Playfair_Display, Inter } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import { Navbar } from '@/components/layout/Navbar';
@@ -15,7 +15,7 @@ const playfairDisplay = Playfair_Display({
   subsets: ['latin'],
 });
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -81,7 +81,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={cn(playfairDisplay.variable, "font-sans", geist.variable)}
+      className={cn(playfairDisplay.variable, "font-sans", inter.variable)}
       data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
