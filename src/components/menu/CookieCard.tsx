@@ -1,15 +1,21 @@
-import Link from 'next/link';
+'use client';
+
 import Image from 'next/image';
+import { Minus, Plus, ShoppingBag } from 'lucide-react';
 
 import type { Product } from '@/data/products';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/components/cart/CartProvider';
 
 interface CookieCardProps {
   product: Product;
 }
 
 export function CookieCard({ product }: CookieCardProps) {
+  const { quantities, addOne, setQuantity } = useCart();
+  const qty = quantities[product.id] ?? 0;
+
   return (
     <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
       <div className="relative aspect-[4/3] bg-gradient-to-br from-primary/30 to-primary/10">
@@ -44,9 +50,37 @@ export function CookieCard({ product }: CookieCardProps) {
           <span className="text-xl font-bold text-primary">
             ${product.price.toFixed(2)}
           </span>
-          <Button asChild size="sm">
-            <Link href="/order">Order Now</Link>
-          </Button>
+          {qty === 0 ? (
+            <Button size="sm" onClick={() => addOne(product.id)}>
+              <ShoppingBag className="size-3.5" /> Add to Cart
+            </Button>
+          ) : (
+            <div className="flex items-center gap-1.5 rounded-full border bg-background px-1 py-1">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon-sm"
+                className="rounded-full"
+                onClick={() => setQuantity(product.id, qty - 1)}
+                aria-label={`Decrease ${product.name} quantity`}
+              >
+                <Minus className="size-3.5" />
+              </Button>
+              <span className="min-w-5 text-center text-sm font-semibold tabular-nums text-foreground">
+                {qty}
+              </span>
+              <Button
+                type="button"
+                variant="default"
+                size="icon-sm"
+                className="rounded-full"
+                onClick={() => addOne(product.id)}
+                aria-label={`Increase ${product.name} quantity`}
+              >
+                <Plus className="size-3.5" />
+              </Button>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

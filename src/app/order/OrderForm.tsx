@@ -23,6 +23,7 @@ import { products } from "@/data/products";
 import { cn } from "@/lib/utils";
 import { createOrderAction } from "@/app/actions/dbActions";
 import { getCurrentSession } from "@/app/actions/authActions";
+import { useCart } from "@/components/cart/CartProvider";
 import type { SiteContactSettings } from "@/lib/siteSettings";
 
 interface LeafletIcon {
@@ -70,7 +71,6 @@ interface FormData {
   pickupOrDelivery: "pickup" | "delivery";
   address: AddressFields;
   addressReference?: string;
-  quantities: Record<string, number>;
   preferredDate: string;
   preferredTime: string;
   notes: string;
@@ -87,8 +87,6 @@ const initialAddress: AddressFields = {
   zip: "",
 };
 
-const initialQuantities = Object.fromEntries(products.map((p) => [p.id, 0]));
-
 const initialForm: FormData = {
   name: "",
   phone: "",
@@ -96,7 +94,6 @@ const initialForm: FormData = {
   pickupOrDelivery: "delivery",
   address: initialAddress,
   addressReference: "",
-  quantities: initialQuantities,
   preferredDate: "",
   preferredTime: "",
   notes: "",
@@ -144,6 +141,7 @@ interface OrderFormProps {
 }
 
 export function OrderForm({ settings }: OrderFormProps) {
+  const { quantities, setQuantity, clearCart } = useCart();
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
@@ -178,13 +176,6 @@ export function OrderForm({ settings }: OrderFormProps) {
     }));
   };
 
-  const setQuantity = (id: string, qty: number) => {
-    setForm((prev) => ({
-      ...prev,
-      quantities: { ...prev.quantities, [id]: Math.max(0, qty) },
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.preferredDate) {
@@ -196,7 +187,7 @@ export function OrderForm({ settings }: OrderFormProps) {
       return;
     }
 
-    const totalCookiesCount = Object.values(form.quantities).reduce((a, b) => a + b, 0);
+    const totalCookiesCount = Object.values(quantities).reduce((a, b) => a + b, 0);
     if (totalCookiesCount === 0) {
       setValidationError("Please select at least one cookie to order.");
       return;
@@ -221,7 +212,7 @@ export function OrderForm({ settings }: OrderFormProps) {
         email: form.email,
         address: form.address,
         addressReference: form.addressReference,
-        quantities: form.quantities,
+        quantities,
         preferredDate: form.preferredDate,
         preferredTime: form.preferredTime,
         notes: form.notes,
@@ -232,6 +223,7 @@ export function OrderForm({ settings }: OrderFormProps) {
 
       if (res.success) {
         setSubmitted(true);
+        clearCart();
       } else {
         setValidationError(res.error || "Failed to submit order request. Please try again.");
       }
@@ -242,23 +234,23 @@ export function OrderForm({ settings }: OrderFormProps) {
   };
 
   const selectedProducts = useMemo(
-    () => products.filter((p) => (form.quantities[p.id] ?? 0) > 0),
-    [form.quantities],
+    () => products.filter((p) => (quantities[p.id] ?? 0) > 0),
+    [quantities],
   );
 
   const totalCookies = useMemo(
-    () => Object.values(form.quantities).reduce((a, b) => a + b, 0),
-    [form.quantities],
+    () => Object.values(quantities).reduce((a, b) => a + b, 0),
+    [quantities],
   );
 
   const totalEstimate = useMemo(() => {
     if (selectedProducts.length === 0) return null;
     const total = selectedProducts.reduce(
-      (sum, p) => sum + p.price * (form.quantities[p.id] ?? 0),
+      (sum, p) => sum + p.price * (quantities[p.id] ?? 0),
       0,
     );
     return `~$${total.toFixed(2)}`;
-  }, [selectedProducts, form.quantities]);
+  }, [selectedProducts, quantities]);
 
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -682,7 +674,7 @@ export function OrderForm({ settings }: OrderFormProps) {
               </Label>
               <div className="flex flex-col gap-3">
                 {products.map((product) => {
-                  const qty = form.quantities[product.id] ?? 0;
+                  const qty = quantities[product.id] ?? 0;
                   return (
                     <div
                       key={product.id}
@@ -748,7 +740,7 @@ export function OrderForm({ settings }: OrderFormProps) {
               <div className="rounded-lg bg-muted px-4 py-3">
                 <div className="flex flex-col gap-2">
                   {selectedProducts.map((p) => {
-                    const qty = form.quantities[p.id] ?? 0;
+                    const qty = quantities[p.id] ?? 0;
                     if (qty === 0) return null;
                     return (
                       <div
