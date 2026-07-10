@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { AlertTriangle, CalendarIcon, Check, MapPin, Minus, Plus, Truck } from "lucide-react";
+import { AlertTriangle, CalendarIcon, Check, Loader2, MapPin, Minus, Plus, Truck } from "lucide-react";
 import { format, parseISO } from "date-fns";
 
 import { Button } from "@/components/ui/button";
@@ -124,6 +124,8 @@ const TIME_SLOTS = [
   { value: "18:00", label: "06:00 PM" },
 ];
 
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const isWeekend = (date: Date) => {
   const day = date.getDay();
   return day === 0 || day === 6; // Sunday or Saturday
@@ -144,6 +146,7 @@ export function OrderForm({ settings }: OrderFormProps) {
   const { quantities, setQuantity, clearCart } = useCart();
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isUserTyping, setIsUserTyping] = useState(false);
   const [session, setSession] = useState<{ name?: string; email?: string; phone?: string } | null>(null);
@@ -178,6 +181,28 @@ export function OrderForm({ settings }: OrderFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    if (!form.name.trim()) {
+      setValidationError("Please enter your full name.");
+      return;
+    }
+
+    if (!EMAIL_PATTERN.test(form.email.trim())) {
+      setValidationError("Please enter a valid email address.");
+      return;
+    }
+
+    if (form.phone.replace(/\D/g, "").length < 7) {
+      setValidationError("Please enter a valid phone number.");
+      return;
+    }
+
+    if (!form.address.line1.trim()) {
+      setValidationError("Please enter your delivery street address.");
+      return;
+    }
+
     if (!form.preferredDate) {
       setValidationError("Please select a preferred delivery date.");
       return;
@@ -198,12 +223,13 @@ export function OrderForm({ settings }: OrderFormProps) {
       return;
     }
 
-    if (!session && createAccount && !password.trim()) {
-      setValidationError("Please specify a password to register your account.");
+    if (!session && createAccount && password.trim().length < 6) {
+      setValidationError("Please specify a password with at least 6 characters.");
       return;
     }
 
     setValidationError(null);
+    setIsSubmitting(true);
 
     try {
       const res = await createOrderAction({
@@ -230,6 +256,8 @@ export function OrderForm({ settings }: OrderFormProps) {
     } catch (err) {
       console.error("Order submission error:", err);
       setValidationError("An error occurred during order submission. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -553,6 +581,7 @@ export function OrderForm({ settings }: OrderFormProps) {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      minLength={6}
                       placeholder="Minimum 6 characters"
                     />
                   </div>
@@ -925,10 +954,16 @@ export function OrderForm({ settings }: OrderFormProps) {
           out via email or phone to confirm your delivery details and time.
         </p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button type="submit" size="lg">
-            Submit Order Request
+          <Button type="submit" size="lg" disabled={isSubmitting}>
+            {isSubmitting ? (
+              <>
+                <Loader2 className="size-4 animate-spin" /> Submitting...
+              </>
+            ) : (
+              "Submit Order Request"
+            )}
           </Button>
-          <Button variant="outline" size="lg" asChild>
+          <Button variant="outline" size="lg" disabled={isSubmitting} asChild>
             <a href={settings.whatsappUrl} target="_blank" rel="noopener noreferrer">
               Message on WhatsApp
             </a>

@@ -14,6 +14,8 @@ import { products } from '@/data/products';
 
 const CART_STORAGE_KEY = 'golden-crumb-cart';
 
+export const MAX_QTY_PER_PRODUCT = 20;
+
 interface CartContextValue {
   quantities: Record<string, number>;
   setQuantity: (productId: string, qty: number) => void;
@@ -59,14 +61,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
       if (qty <= 0) {
         delete next[productId];
       } else {
-        next[productId] = qty;
+        next[productId] = Math.min(qty, MAX_QTY_PER_PRODUCT);
       }
       return next;
     });
   }, []);
 
   const addOne = useCallback((productId: string) => {
-    setQuantities((prev) => ({ ...prev, [productId]: (prev[productId] ?? 0) + 1 }));
+    setQuantities((prev) => ({
+      ...prev,
+      [productId]: Math.min((prev[productId] ?? 0) + 1, MAX_QTY_PER_PRODUCT),
+    }));
   }, []);
 
   const clearCart = useCallback(() => {

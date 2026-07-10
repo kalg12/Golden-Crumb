@@ -6,7 +6,7 @@ import { Minus, Plus, ShoppingBag } from 'lucide-react';
 import type { Product } from '@/data/products';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/components/cart/CartProvider';
+import { useCart, MAX_QTY_PER_PRODUCT } from '@/components/cart/CartProvider';
 
 interface CookieCardProps {
   product: Product;
@@ -15,6 +15,7 @@ interface CookieCardProps {
 export function CookieCard({ product }: CookieCardProps) {
   const { quantities, addOne, setQuantity } = useCart();
   const qty = quantities[product.id] ?? 0;
+  const atMax = qty >= MAX_QTY_PER_PRODUCT;
 
   return (
     <Card className="group flex h-full flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
@@ -74,6 +75,7 @@ export function CookieCard({ product }: CookieCardProps) {
                 variant="default"
                 size="icon-sm"
                 className="rounded-full"
+                disabled={atMax}
                 onClick={() => addOne(product.id)}
                 aria-label={`Increase ${product.name} quantity`}
               >
@@ -82,6 +84,11 @@ export function CookieCard({ product }: CookieCardProps) {
             </div>
           )}
         </div>
+        {atMax && (
+          <p className="mt-1.5 text-right text-xs text-muted-foreground">
+            Max {MAX_QTY_PER_PRODUCT} per order
+          </p>
+        )}
       </CardContent>
     </Card>
   );
