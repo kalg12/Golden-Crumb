@@ -1,5 +1,7 @@
 import { Container } from '@/components/shared/Container';
 import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { ContactForm } from './ContactForm';
 import { getSiteSettings } from '@/lib/siteSettings';
 
 export async function ContactCta() {
@@ -45,6 +47,13 @@ export async function ContactCta() {
               {settings.contactEmail}
             </a>
           </p>
+
+          <Separator className="mx-auto my-8 max-w-md" />
+
+          <h3 className="font-serif text-xl font-bold text-foreground">
+            Or Send Us a Message
+          </h3>
+          <ContactForm />
         </div>
       </Container>
     </section>
