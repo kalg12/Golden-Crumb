@@ -573,8 +573,86 @@ export function OrderForm({ settings }: OrderFormProps) {
         </Card>
       </RevealOnScroll>
 
-      {/* Card 2 — Order Details */}
-      <RevealOnScroll delay={100}>
+      {/* Card 2 — Date & Time */}
+      <RevealOnScroll delay={100} className="relative z-10">
+        <Card className="overflow-visible">
+          <CardContent className="flex flex-col gap-5 p-6 sm:p-8">
+            <h3 className="font-serif text-lg font-bold text-foreground">
+              Preferred Delivery Date &amp; Time
+            </h3>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-2">
+                <Label>
+                  Delivery date <span className="text-primary">*</span>
+                </Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal px-3 py-2 h-10 border border-input rounded-md bg-background text-sm",
+                        !form.preferredDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                      {form.preferredDate ? (
+                        format(parseISO(form.preferredDate), "PPP")
+                      ) : (
+                        <span>Select delivery date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={form.preferredDate ? parseISO(form.preferredDate) : undefined}
+                      onSelect={(date) => {
+                        if (date) {
+                          const yyyy = date.getFullYear();
+                          const mm = String(date.getMonth() + 1).padStart(2, "0");
+                          const dd = String(date.getDate()).padStart(2, "0");
+                          update("preferredDate", `${yyyy}-${mm}-${dd}`);
+                          if (validationError) setValidationError(null);
+                        }
+                      }}
+                      disabled={disableDate}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="time">
+                  Delivery time <span className="text-primary">*</span>
+                </Label>
+                <Select
+                  value={form.preferredTime}
+                  onValueChange={(value) => {
+                    update("preferredTime", value);
+                    if (validationError) setValidationError(null);
+                  }}
+                >
+                  <SelectTrigger id="time" className="w-full">
+                    <SelectValue placeholder="Select delivery time" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIME_SLOTS.map((slot) => (
+                      <SelectItem key={slot.value} value={slot.value}>
+                        {slot.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+              Please specify when you would like to receive your cookies. We deliver within San Francisco on weekends (Saturday &amp; Sunday) between 9:00 AM and 6:00 PM.
+            </p>
+          </CardContent>
+        </Card>
+      </RevealOnScroll>
+
+      {/* Card 3 — Order Details */}
+      <RevealOnScroll delay={200}>
         <Card>
           <CardContent className="flex flex-col gap-6 p-6 sm:p-8">
             <h3 className="font-serif text-lg font-bold text-foreground">
@@ -772,84 +850,6 @@ export function OrderForm({ settings }: OrderFormProps) {
                 </div>
               </div>
             )}
-          </CardContent>
-        </Card>
-      </RevealOnScroll>
-
-      {/* Card 3 — Date & Time */}
-      <RevealOnScroll delay={200} className="relative z-10">
-        <Card className="overflow-visible">
-          <CardContent className="flex flex-col gap-5 p-6 sm:p-8">
-            <h3 className="font-serif text-lg font-bold text-foreground">
-              Preferred Delivery Date &amp; Time
-            </h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="flex flex-col gap-2">
-                <Label>
-                  Delivery date <span className="text-primary">*</span>
-                </Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal px-3 py-2 h-10 border border-input rounded-md bg-background text-sm",
-                        !form.preferredDate && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
-                      {form.preferredDate ? (
-                        format(parseISO(form.preferredDate), "PPP")
-                      ) : (
-                        <span>Select delivery date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={form.preferredDate ? parseISO(form.preferredDate) : undefined}
-                      onSelect={(date) => {
-                        if (date) {
-                          const yyyy = date.getFullYear();
-                          const mm = String(date.getMonth() + 1).padStart(2, "0");
-                          const dd = String(date.getDate()).padStart(2, "0");
-                          update("preferredDate", `${yyyy}-${mm}-${dd}`);
-                          if (validationError) setValidationError(null);
-                        }
-                      }}
-                      disabled={disableDate}
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="time">
-                  Delivery time <span className="text-primary">*</span>
-                </Label>
-                <Select
-                  value={form.preferredTime}
-                  onValueChange={(value) => {
-                    update("preferredTime", value);
-                    if (validationError) setValidationError(null);
-                  }}
-                >
-                  <SelectTrigger id="time" className="w-full">
-                    <SelectValue placeholder="Select delivery time" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TIME_SLOTS.map((slot) => (
-                      <SelectItem key={slot.value} value={slot.value}>
-                        {slot.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
-              Please specify when you would like to receive your cookies. We deliver within San Francisco on weekends (Saturday &amp; Sunday) between 9:00 AM and 6:00 PM.
-            </p>
           </CardContent>
         </Card>
       </RevealOnScroll>
