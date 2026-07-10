@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { LogIn, User, ShieldAlert, ArrowLeft } from 'lucide-react';
+import { LogIn, User, ShieldAlert, ArrowLeft, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { loginAction } from '@/app/actions/authActions';
 
@@ -138,6 +138,7 @@ export function LoginForm() {
           disabled={loading}
           className="w-full py-2.5 mt-2 bg-[#D49A55] hover:bg-[#D49A55]/90 disabled:opacity-50 text-[#FFF7EC] font-bold rounded-xl text-sm transition-all shadow-sm flex items-center justify-center gap-2"
         >
+          {loading && <Loader2 className="size-4 animate-spin" />}
           {loading ? 'Authenticating...' : 'Sign In'}
         </button>
       </form>

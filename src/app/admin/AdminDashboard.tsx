@@ -30,6 +30,7 @@ import {
   Settings,
   Eye,
   Code,
+  Loader2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -253,6 +254,10 @@ export function AdminDashboard({
   // Loading flag for backend refreshing
   const [loading, setLoading] = useState(false);
 
+  // Tracks which specific order's status update is in flight, so only that
+  // order's button disables/spins instead of the whole dashboard.
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+
   // Handle logout
   const handleLogout = async () => {
     await logoutAction();
@@ -294,7 +299,8 @@ export function AdminDashboard({
 
   // Update order status trigger helper
   const handleUpdateStatus = async (orderId: string, newStatus: string) => {
-    setLoading(true);
+    if (updatingOrderId) return;
+    setUpdatingOrderId(orderId);
     try {
       let res;
       if (newStatus === 'kitchen_prep') {
@@ -311,7 +317,7 @@ export function AdminDashboard({
     } catch (err) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setUpdatingOrderId(null);
     }
   };
 
@@ -513,22 +519,25 @@ export function AdminDashboard({
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
           onUpdateStatus={handleUpdateStatus}
+          updatingOrderId={updatingOrderId}
         />
       )}
- 
+
       {activeRole === 'kitchen' && (
         <KitchenView
           orders={orders}
           onUpdateStatus={handleUpdateStatus}
           onPrintLabel={(o) => setPrintingOrder(o)}
+          updatingOrderId={updatingOrderId}
         />
       )}
- 
+
       {activeRole === 'courier' && (
         <CourierView
           route={route}
           bakeryCoords={bakeryCoords}
           onUpdateStatus={handleUpdateStatus}
+          updatingOrderId={updatingOrderId}
         />
       )}
  
@@ -589,6 +598,7 @@ interface AdminViewProps {
   statusFilter: string;
   setStatusFilter: (s: string) => void;
   onUpdateStatus: (id: string, s: string) => void;
+  updatingOrderId: string | null;
 }
 
 function AdminView({
@@ -607,6 +617,7 @@ function AdminView({
   statusFilter,
   setStatusFilter,
   onUpdateStatus,
+  updatingOrderId,
 }: AdminViewProps) {
   // SVG Sales Chart layout parameters
   const chartHeight = 160;
@@ -896,8 +907,10 @@ function AdminView({
                             {o.status === 'pending' && (
                               <button
                                 onClick={() => onUpdateStatus(o._id, 'kitchen_prep')}
-                                className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all"
+                                disabled={updatingOrderId === o._id}
+                                className="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all disabled:opacity-50 flex items-center gap-1"
                               >
+                                {updatingOrderId === o._id && <Loader2 className="size-3 animate-spin" />}
                                 Send to Kitchen
                               </button>
                             )}
@@ -909,16 +922,20 @@ function AdminView({
                             {o.status === 'ready_for_delivery' && (
                               <button
                                 onClick={() => onUpdateStatus(o._id, 'out_for_delivery')}
-                                className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all"
+                                disabled={updatingOrderId === o._id}
+                                className="px-2.5 py-1.5 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all disabled:opacity-50 flex items-center gap-1"
                               >
+                                {updatingOrderId === o._id && <Loader2 className="size-3 animate-spin" />}
                                 Send Out
                               </button>
                             )}
                             {o.status === 'out_for_delivery' && (
                               <button
                                 onClick={() => onUpdateStatus(o._id, 'delivered')}
-                                className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all"
+                                disabled={updatingOrderId === o._id}
+                                className="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg text-[10px] shadow-sm transition-all disabled:opacity-50 flex items-center gap-1"
                               >
+                                {updatingOrderId === o._id && <Loader2 className="size-3 animate-spin" />}
                                 Complete
                               </button>
                             )}
@@ -935,7 +952,8 @@ function AdminView({
                             {o.status !== 'cancelled' && o.status !== 'delivered' && (
                               <button
                                 onClick={() => onUpdateStatus(o._id, 'cancelled')}
-                                className="p-1.5 bg-[#FFF7EC] hover:bg-red-500/10 text-red-600 rounded-lg text-[10px] border border-red-500/10"
+                                disabled={updatingOrderId === o._id}
+                                className="p-1.5 bg-[#FFF7EC] hover:bg-red-500/10 text-red-600 rounded-lg text-[10px] border border-red-500/10 disabled:opacity-50"
                                 title="Cancel order"
                               >
                                 Cancel
@@ -1090,9 +1108,10 @@ interface KitchenViewProps {
   orders: OrderData[];
   onUpdateStatus: (id: string, s: string) => void;
   onPrintLabel: (o: OrderData) => void;
+  updatingOrderId: string | null;
 }
 
-function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps) {
+function KitchenView({ orders, onUpdateStatus, onPrintLabel, updatingOrderId }: KitchenViewProps) {
   // Group orders by their active kitchen stages
   const pendingOrders = useMemo(() => {
     return orders
@@ -1164,6 +1183,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                   order={o}
                   onUpdateStatus={onUpdateStatus}
                   onPrintLabel={onPrintLabel}
+                  updatingOrderId={updatingOrderId}
                 />
               ))
             ) : (
@@ -1193,6 +1213,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                   order={o}
                   onUpdateStatus={onUpdateStatus}
                   onPrintLabel={onPrintLabel}
+                  updatingOrderId={updatingOrderId}
                 />
               ))
             ) : (
@@ -1222,6 +1243,7 @@ function KitchenView({ orders, onUpdateStatus, onPrintLabel }: KitchenViewProps)
                   order={o}
                   onUpdateStatus={onUpdateStatus}
                   onPrintLabel={onPrintLabel}
+                  updatingOrderId={updatingOrderId}
                 />
               ))
             ) : (
@@ -1240,9 +1262,11 @@ interface KitchenOrderCardProps {
   order: OrderData;
   onUpdateStatus: (id: string, s: string) => void;
   onPrintLabel: (o: OrderData) => void;
+  updatingOrderId: string | null;
 }
 
-function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderCardProps) {
+function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel, updatingOrderId }: KitchenOrderCardProps) {
+  const isUpdating = updatingOrderId === order._id;
   const prepDurationText = useMemo(() => {
     if (order.prepDuration) {
       const mins = Math.floor(order.prepDuration / 60);
@@ -1338,16 +1362,20 @@ function KitchenOrderCard({ order, onUpdateStatus, onPrintLabel }: KitchenOrderC
         {order.status === 'pending' && (
           <button
             onClick={() => onUpdateStatus(order._id, 'kitchen_prep')}
-            className="flex-1 py-1.5 bg-amber-500 hover:bg-amber-600 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all"
+            disabled={isUpdating}
+            className="flex-1 py-1.5 bg-amber-500 hover:bg-amber-600 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1"
           >
+            {isUpdating && <Loader2 className="size-3 animate-spin" />}
             Start Baking
           </button>
         )}
         {order.status === 'kitchen_prep' && (
           <button
             onClick={() => onUpdateStatus(order._id, 'ready_for_delivery')}
-            className="flex-1 py-1.5 bg-green-600 hover:bg-green-700 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all"
+            disabled={isUpdating}
+            className="flex-1 py-1.5 bg-green-600 hover:bg-green-700 text-[#FFF7EC] font-bold rounded-xl text-[10px] shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1"
           >
+            {isUpdating && <Loader2 className="size-3 animate-spin" />}
             Ready / Completed
           </button>
         )}
@@ -1566,9 +1594,10 @@ interface CourierViewProps {
   route: RouteStop[];
   bakeryCoords: { lat: number; lng: number };
   onUpdateStatus: (id: string, s: string) => void;
+  updatingOrderId: string | null;
 }
 
-function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) {
+function CourierView({ route, bakeryCoords, onUpdateStatus, updatingOrderId }: CourierViewProps) {
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef<{ remove: () => void; fitBounds: (bounds: unknown, options?: Record<string, unknown>) => void } | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -1804,17 +1833,29 @@ function CourierView({ route, bakeryCoords, onUpdateStatus }: CourierViewProps) 
                     {stop.status === 'ready_for_delivery' && (
                       <button
                         onClick={() => onUpdateStatus(stop._id, 'out_for_delivery')}
-                        className="w-full py-1.5 bg-[#D49A55] hover:bg-[#D49A55]/90 text-white font-bold rounded-xl text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                        disabled={updatingOrderId === stop._id}
+                        className="w-full py-1.5 bg-[#D49A55] hover:bg-[#D49A55]/90 text-white font-bold rounded-xl text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
                       >
-                        <Truck className="size-3.5" /> Depart for Delivery
+                        {updatingOrderId === stop._id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <Truck className="size-3.5" />
+                        )}
+                        Depart for Delivery
                       </button>
                     )}
                     {stop.status === 'out_for_delivery' && (
                       <button
                         onClick={() => onUpdateStatus(stop._id, 'delivered')}
-                        className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-all"
+                        disabled={updatingOrderId === stop._id}
+                        className="w-full py-1.5 bg-green-600 hover:bg-green-700 text-white font-bold rounded-xl text-[11px] shadow-sm flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
                       >
-                        <CheckCircle className="size-3.5" /> Mark Delivered
+                        {updatingOrderId === stop._id ? (
+                          <Loader2 className="size-3.5 animate-spin" />
+                        ) : (
+                          <CheckCircle className="size-3.5" />
+                        )}
+                        Mark Delivered
                       </button>
                     )}
                     {stop.status === 'pending' && (
@@ -2097,8 +2138,9 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
             >
+              {loading && <Loader2 className="size-3.5 animate-spin" />}
               {loading ? 'Saving...' : 'Create Account'}
             </button>
           </div>
@@ -2172,8 +2214,9 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
             >
+              {loading && <Loader2 className="size-3.5 animate-spin" />}
               {loading ? 'Saving...' : 'Update Details'}
             </button>
           </div>
@@ -2244,12 +2287,10 @@ function StaffManagementView({ initialUsers, currentUserEmail }: StaffManagement
                         </button>
                         <button
                           onClick={() => handleDelete(user._id, user.name)}
-                          disabled={isSelf}
+                          disabled={isSelf || loading}
                           className={cn(
-                            'p-1.5 border border-red-500/20 text-red-600 rounded-lg transition-all',
-                            isSelf
-                              ? 'opacity-30 cursor-not-allowed'
-                              : 'hover:bg-red-500/10'
+                            'p-1.5 border border-red-500/20 text-red-600 rounded-lg transition-all disabled:opacity-30 disabled:cursor-not-allowed',
+                            !isSelf && !loading && 'hover:bg-red-500/10'
                           )}
                           title={isSelf ? 'Cannot delete yourself' : 'Delete staff account'}
                         >
@@ -2818,8 +2859,9 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+                className="flex-1 px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
+                {loading && <Loader2 className="size-3.5 animate-spin" />}
                 {loading ? 'Saving Settings...' : 'Save Settings'}
               </button>
               <button
@@ -2829,7 +2871,7 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                 className="px-3.5 py-2.5 border border-red-500/20 hover:bg-red-500/10 text-red-600 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 flex items-center justify-center"
                 title="Reset to defaults"
               >
-                <RotateCcw className="size-4" />
+                <RotateCcw className={cn('size-4', loading && 'animate-spin')} />
               </button>
             </div>
           </form>
@@ -2862,7 +2904,8 @@ function EmailSettingsView({ initialSettings }: EmailSettingsViewProps) {
                   disabled={testing || !testRecipient}
                   className="px-4 py-2 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  {testing ? 'Sending...' : 'Send Test'} <Send className="size-3.5" />
+                  {testing ? 'Sending...' : 'Send Test'}
+                  {testing ? <Loader2 className="size-3.5 animate-spin" /> : <Send className="size-3.5" />}
                 </button>
               </div>
             </div>
@@ -3118,8 +3161,9 @@ function SiteSettingsView({ initialSettings }: SiteSettingsViewProps) {
         <button
           type="submit"
           disabled={loading}
-          className="px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+          className="px-4 py-2.5 bg-[#D49A55] hover:bg-[#D49A55]/95 text-[#FFF7EC] text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50 flex items-center gap-1.5"
         >
+          {loading && <Loader2 className="size-3.5 animate-spin" />}
           {loading ? 'Saving...' : 'Save Site Settings'}
         </button>
       </form>

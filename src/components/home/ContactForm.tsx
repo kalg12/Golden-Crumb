@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +18,7 @@ export function ContactForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setFeedback(null);
     setSubmitting(true);
 
@@ -89,6 +91,7 @@ export function ContactForm() {
       )}
 
       <Button type="submit" disabled={submitting}>
+        {submitting && <Loader2 className="size-4 animate-spin" />}
         {submitting ? 'Sending...' : 'Send Message'}
       </Button>
     </form>
