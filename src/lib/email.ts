@@ -2,6 +2,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { EmailSettings } from '@/models/EmailSettings';
 import { getSiteSettings } from '@/lib/siteSettings';
+import { getBaseUrl } from '@/lib/url';
 export const DEFAULT_TEMPLATES = {
   customerConfirmation: {
     subject: '🍪 Order Confirmation #{{orderId}} - Golden Crumb',
@@ -384,8 +385,8 @@ export async function sendOrderConfirmationEmail(order: {
     preferredTime: order.preferredTime,
     deliveryAddress: order.address.line1,
     itemsTable: itemsTable,
-    trackingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders`,
-    adminUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/admin`,
+    trackingUrl: `${getBaseUrl()}/my-orders`,
+    adminUrl: `${getBaseUrl()}/admin`,
   };
 
   // 1. Send to Customer
@@ -477,7 +478,7 @@ export async function sendOrderStatusUpdateEmail(order: {
     preferredTime: order.preferredTime,
     statusTitle,
     statusDescription,
-    trackingUrl: `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/my-orders`,
+    trackingUrl: `${getBaseUrl()}/my-orders`,
   };
 
   const subject = replacePlaceholders(templateConfig.subject, variables);
