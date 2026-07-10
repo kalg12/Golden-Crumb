@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Playfair_Display, Inter } from 'next/font/google';
 
 import { ThemeProvider } from '@/components/theme/ThemeProvider';
+import { CartProvider } from '@/components/cart/CartProvider';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
@@ -125,10 +126,12 @@ export default async function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col">
         <ThemeProvider>
-          <Navbar />
-          {children}
-          <Footer />
-          <ScrollToTop />
+          <CartProvider>
+            <Navbar />
+            {children}
+            <Footer />
+            <ScrollToTop />
+          </CartProvider>
         </ThemeProvider>
       </body>
     </html>
